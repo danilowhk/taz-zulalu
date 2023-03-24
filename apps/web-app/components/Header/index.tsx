@@ -6,6 +6,7 @@ import axios from "axios"
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import { usePassportModalContext } from "../../context/PassportModalContext"
 import getUserSession from "../../hooks/getUserSession"
+import PassportModal from "../PassortModal"
 
 const supabase = createBrowserSupabaseClient()
 
@@ -108,6 +109,8 @@ const Header = () => {
                     </li>
                 )}
             </div>
+            <PassportModal openPassportModal={openPassportModal} setOpenPassportModal={setOpenPassportModal} />
+
             <ul className="flex gap-5 items-center text-white">
                 {/* <li>About</li> */}
                 <NextLink href={"/events"}>
@@ -125,6 +128,12 @@ const Header = () => {
                             onClick={requestSignedZuID}
                         >
                             Connect Passport
+                        </button>
+                        <button
+                            className="bg-zulalu-primary text-white py-[8px] px-[16px] rounded-[8px]"
+                            onClick={() => setOpenPassportModal(true)}
+                        >
+                            Connect With Email
                         </button>
                     </li>
                 )}
