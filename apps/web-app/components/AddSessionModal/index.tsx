@@ -21,9 +21,9 @@ type NewSessionState = {
     level: string
     location: string
     name: string
+    duration: string
     startDate: Date
     startTime: string
-    subevent_id: number
     tags: string[]
     team_members: {
         name: string
@@ -55,11 +55,11 @@ const AddSessionModal = ({ isOpen, closeModal, event, sessions }: Props) => {
         tags: [],
         info: "",
         event_id: event.id,
+        duration: "0",
         hasTicket: false,
         format: "Live",
         level: "Beginner",
         equipment: "",
-        subevent_id: 0,
         description: "",
         track: "ZK Week",
         event_type: "Workshop",
@@ -67,7 +67,7 @@ const AddSessionModal = ({ isOpen, closeModal, event, sessions }: Props) => {
         event_item_id: event.item_id
     })
     const [amountTickets, setAmountTickets] = useState("0")
-
+    console.log("evvvent", event)
     const handleSubmit = async () => {
         setIsLoading(true)
         const formattedTime = `${newSession.startTime}:00`
@@ -100,7 +100,8 @@ const AddSessionModal = ({ isOpen, closeModal, event, sessions }: Props) => {
                 const createEventDB = await axios.post("/api/createSession", {
                     ...newSession,
                     subEventId: subEventRes.data.id,
-                    startTime: formattedTime
+                    startTime: formattedTime,
+                    quota_id: quotaCreatedRes.data.id
                 })
                 console.log("DB response: ", createEventDB)
             } else {
@@ -139,9 +140,9 @@ const AddSessionModal = ({ isOpen, closeModal, event, sessions }: Props) => {
             tags: [],
             info: "",
             event_id: event.id,
-            event_item_id: 0,
-            event_slug: "",
-            subevent_id: 0,
+            event_item_id: event.item_id,
+            event_slug: event.slug,
+            duration: "0",
             description: "",
             hasTicket: false,
             track: "ZK Week",
@@ -182,7 +183,13 @@ const AddSessionModal = ({ isOpen, closeModal, event, sessions }: Props) => {
                             <Dialog.Panel className="flex flex-col h-full w-5/6 overflow-y-scroll max-w-full transform rounded-lg bg-white text-left align-middle  transition-all">
                                 <div className="w-full h-full py-5 px-10">
                                     <div className="flex w-full justify-between items-center">
-                                        <h1 className="text-[24px] font-[600]">Session Info (for the public)</h1>
+                                        <h1 className="text-[24px] font-[600]">
+                                            {steps === 1
+                                                ? "Session Logistics (for organizers)"
+                                                : steps === 2
+                                                ? "Session info (shared with the Zuzalu team)"
+                                                : "Review Session"}
+                                        </h1>
                                         <div
                                             onClick={() => closeModal(false)}
                                             className="cursor-pointer flex items-center border-2 border-black justify-center w-[25px] h-[25px] rounded-full"

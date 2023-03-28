@@ -7,11 +7,11 @@ const supabase = createClient(supabaseUrl, supabaseKey as string)
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
-        const response = await supabase.from("participants").select("*,users(*),events(*)")
+        const response = await supabase.from("favorited_sessions").select("*,users(*),events(*)")
 
         res.status(200).send(response.data)
     } catch (err: any) {
         console.log("error: ", err)
-        res.status(500).json({ statusCode: 500, message: err.message })
+        res.status(500).json({ statusCode: 500, message: err })
     }
 }

@@ -1,33 +1,28 @@
-import { usePassportModalContext } from "../../context/PassportModalContext"
-import PassportModal from "../PassportModal"
-import { getUserOnID } from "../../hooks/getUserOnID"
+const MainSection = () => (
+    <div className="flex flex-col bg-[#EEEEF0]">
+        <div className="overflow-hidden w-full h-full flex justify-between lg:flex-row flex-col py-5  px-[28px] md:px-[48px] bg-white rounded-[16px] gap-[100px] lg:gap-10">
+            <div className="flex md:w-3/6 w-full flex-col gap-5">
+                <h1 className="font-semibold text-[32px] md:text-[52px] md:mb-10">
+                    Zuzalu is a first-of-its-kind pop-up city community in{" "}
+                    <span className="relative z-10 inline-block px-2">
+                        <span className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-green-200"></span>
+                        <span className="relative z-[10]">Montenegro.</span>
+                    </span>{" "}
+                </h1>
+                <h1 className="font-normal text-[16px] md:text-[18px] w-[auto] md:w-[600px] leading-[25px] md:leading-[25px]">
+                    Join 200 core residents brought together by a shared desire to learn, create, live longer and
+                    healthier lives, and build self-sustaining communities.
+                </h1>
+            </div>
+            <div className="p-5 relative w-full lg:w-3/6 h-[500px] w-full flex justify-center items-center">
+                <div className="absolute z-[10]  bottom-0 border border-black w-[550px] h-[300px] bg-eventbg2 filter blur-[150px] z-[1]" />
+                <div className="absolute z-[9]  border border-black w-[500px] h-[379px] bg-eventbg1 filter blur-[150px] z-[1]" />
 
-const MainSection = () => {
-    const { openPassportModal, setOpenPassportModal } = usePassportModalContext()
-    const  userObj  = getUserOnID()
-    console.log("user object", userObj)
-    return (
-        <div className="flex min-h-[90vh] h-full w-full relative">
-            <PassportModal openPassportModal={openPassportModal} setOpenPassportModal={setOpenPassportModal} />
-            <div className="z-[10] bg-gradient-linear absolute top-0 h-full w-full bg-opacity-80 transform scale-x-[-1]" />
-            <div className="bg-mountains absolute top-0 w-full h-full bg-no-repeat bg-cover bg-center" />
-            <div className="absolute bottom-0 right-0 w-[600px] h-[660px] z-[11] bg-zulaluVector bg-contain bg-no-repeat" />
-            <div className="z-[11] flex w-full px-[72px] py-[180px]">
-                <div className="flex w-[700px] flex-col gap-5">
-                    <h1 className="text-[18px] md:text-[24px] text-blue md:mb-5 md:text-gray-900 ">
-                        March 25 to May 25, 2023
-                    </h1>
-                    <h1 className="text-[30px] md:text-[60px] md:mb-10">
-                        A first-of-its-kind pop-up city community in Montenegro
-                    </h1>
-                    <h1 className="text-[18px] md:text-[24px] md:w-[80%]">
-                        Join 200 core residents for healthy living, co-working and learning through co-created events on
-                        synthetic biology, ZK, public goods, longevity, and network states.
-                    </h1>
-                </div>
+                <div className="top-0 absolute z-[11] w-full h-full bg-contain bg-center bg-no-repeat bg-[url('/vector.png')]" />
+                <div className="top-0 absolute z-[12] w-full h-full bg-contain bg-center bg-no-repeat bg-[url('/49.png')]" />
             </div>
         </div>
-    )
-}
+    </div>
+)
 
 export default MainSection
