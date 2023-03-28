@@ -9,7 +9,6 @@ type NewSessionState = {
     event_item_id: number
     event_slug: string
     event_type: string
-    duration: string
     format: string
     hasTicket: boolean
     info: string
@@ -18,6 +17,7 @@ type NewSessionState = {
     name: string
     startDate: Date
     startTime: string
+    subevent_id: number
     tags: string[]
     team_members: {
         name: string

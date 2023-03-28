@@ -1,39 +1,34 @@
 import { GetServerSideProps } from "next"
 import axios from "axios"
 import SessionPage from "../../../../templates/SessionPage"
-import { SessionsDTO } from "../../../../types"
+
+import { SessionsDTO, EventsDTO } from "../../../../types"
 
 type Props = {
     session: SessionsDTO
-    sessions: SessionsDTO[]
+    event: EventsDTO
 }
 
-const Session = ({ session, sessions }: Props) => <SessionPage session={session} sessions={sessions} />
+const LOGGED_IN_USER_ID = 1
+
+const Session = ({ session, event }: Props) => <SessionPage event={event} session={session} />
 
 export default Session
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res, query }) => {
+export const getServerSideProps: GetServerSideProps = async ({ res, query }) => {
     try {
         const url = process.env.URL_TO_FETCH
 
-        const responseSession = await axios.get(`${url}/api/fetchSession/${query.sessionId}`, {
-            headers: {
-                Cookie: req.headers.cookie || "" // Pass cookies from the incoming request
-            }
-        })
+        const response = await axios.get(`${url}/api/fetchSession/${query.sessionId}/${LOGGED_IN_USER_ID}`)
+        const session = await response.data
 
-        const session = await responseSession.data
-        console.log("found", session)
-        const responseSessions = await axios.get(`${url}/api/fetchSessions`, {
-            headers: {
-                Cookie: req.headers.cookie || "" // Pass cookies from the incoming request
-            }
-        })
+        console.log("URL to fetch", `${url}/api/fetchSession/${query.sessionId}/${LOGGED_IN_USER_ID}`)
 
-        const sessions = await responseSessions.data
+        const eventResponse = await axios.get(`${url}/api/fetchEvents/${query.parentMessageId}`)
+        const event = await eventResponse.data
 
         return {
-            props: { session, sessions }
+            props: { session, event }
         }
     } catch (error) {
         res.statusCode = 404

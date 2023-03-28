@@ -91,7 +91,3 @@ out
 !.yarn/versions
 
 notes/
-
-./apps/web-app/pages/signup-test.jsx
-./apps/web-app/pages/deleteUsers.jsx
-./yarn/install-state.gz
