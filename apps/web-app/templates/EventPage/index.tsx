@@ -1,66 +1,120 @@
-import React, { useEffect, useRef, useState } from "react"
+/* eslint-disable @typescript-eslint/no-shadow */
+import React, { useEffect, useRef, useState, useCallback } from "react"
 
-import { useRouter } from "next/router"
 import NextImage from "next/image"
+import Link from "next/link"
+
 import moment from "moment"
-import { ToastContainer } from "react-toastify"
-import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import AddSessionModal from "../../components/AddSessionModal"
 import Sessions from "../../components/Sessions"
 import { EventsDTO, SessionsDTO } from "../../types"
 import BaseTemplate from "../Base"
-
-const supabase = createBrowserSupabaseClient()
+import { useUserAuthenticationContext } from "../../context/UserAuthenticationContext"
+import StyledDatePicker from "../../components/StyledDatePicker"
 
 type Props = {
     event: EventsDTO
     sessions: SessionsDTO[]
+    allSessions: SessionsDTO[]
 }
 
-const EventPage = ({ event, sessions }: Props) => {
-    const wraperRef = useRef(null)
-
+const EventPage = ({ event, sessions, allSessions }: Props) => {
+    const { isAuth, userRole } = useUserAuthenticationContext()
     const [openAddSessionModal, setOpenAddSessionModal] = useState(false)
-    // const [updateEventModal, setUpdateEventModal] = useState(false)
-    const [selectedOptions, setSelectedOptions] = useState<string[]>([])
-    const [openFilterOptions, setOpenFilterOptions] = useState(false)
+    const [speakers, setSpeakers] = useState<string[]>([])
 
-    const startDate = moment(new Date(event.startDate)).add(1, "day")
-    const endDate = moment(new Date(event.endDate)).add(1, "day")
-    const formattedDate = `${startDate.format("MMM D")}-${endDate.format("D, YYYY")}`
+    const localtionRef = useRef(null)
+    const [selectedLocations, setSelectedLocations] = useState<string[]>([])
+    const [locationsOptions, setLocationsOptions] = useState<string[]>([])
 
-    const filterSince = new Date(event.startDate)
-    const filterAfter = new Date(event.endDate)
+    const [openLocationFilter, setOpenLocationFilter] = useState(false)
 
-    const dateOptions = []
+    const isOrganizer = userRole === "resident"
 
-    for (let date = filterSince; date <= filterAfter; date.setDate(date.getDate() + 1)) {
-        const option = moment(new Date(date)).add(1, "day").format("dddd, MMMM Do, YYYY")
-        dateOptions.push(option)
+    /* Begin DatePicker code */
+    const [openDatePicker, setOpenDatePicker] = useState(false)
+    const [datePickerDescription, setDatePickerDescription] = useState("FULL PROGRAM")
+    const [filteredSessions, setFilteredSessions] = useState<SessionsDTO[]>(sessions)
+    const [datePickerStartDate, setDatePickerStartDate] = useState<Date | null>(null)
+    const [datePickerEndDate, setDatePickerEndDate] = useState<Date | null>(null)
+    const datePickerWrapperRef = useRef(null)
+
+    const toggleDatePicker = () => {
+        setOpenDatePicker(!openDatePicker)
     }
 
-    const handleOptionChange = (option: string) => {
-        if (selectedOptions.includes(option)) {
-            setSelectedOptions(selectedOptions.filter((item) => item !== option))
-        } else {
-            setSelectedOptions([...selectedOptions, option])
+    const handleDateSelection = (selectedDates: [Date | null, Date | null]) => {
+        // Filter sessions
+        const [start, end] = selectedDates.map((date) => (date ? moment.utc(date).startOf("day").toDate() : null))
+        setDatePickerStartDate(start)
+        setDatePickerEndDate(end)
+        const filtered = sessions.filter((session) => {
+            const sessionDate = moment.utc(session.startDate).startOf("day").toDate() // Remove time part for date comparison
+            const sessionEndDate = end ? moment.utc(end) : null
+            let endOfDay = null
+            if (sessionEndDate) {
+                endOfDay = sessionEndDate.endOf("day").toDate()
+            }
+            return (start === null || start <= sessionDate) && (endOfDay === null || sessionDate <= endOfDay)
+        })
+        setFilteredSessions(filtered)
+    }
+
+    // Update filter header description
+    // (done in useEffect because start and end date must be done updating first)
+    useEffect(() => {
+        const today = moment().utc().startOf("day")
+        const start = datePickerStartDate ? moment(datePickerStartDate).utc() : null
+        const end = datePickerEndDate ? moment(datePickerEndDate).utc() : null
+
+        if (start?.isSame(today) && end?.isSame(today)) {
+            setDatePickerDescription("TODAY")
+        } else if (start?.isSame(today)) {
+            setDatePickerDescription("TODAY ONWARD")
+        } else if (start && end === null) {
+            setDatePickerDescription(`${start.format("MMMM D")} ONWARD`)
+        } else if (start && end && start.isSame(end)) {
+            setDatePickerDescription(start.format("dddd MMMM D"))
+        } else if (start && end) {
+            setDatePickerDescription(`${start.format("MMMM D")} - ${end.format("D")}`)
+        }
+    }, [datePickerStartDate, datePickerEndDate])
+
+    const handleDatePickerClickOutside = (e: MouseEvent) => {
+        const { current: wrap } = datePickerWrapperRef as { current: HTMLElement | null }
+
+        if (wrap && !wrap.contains(e.target as Node)) {
+            setOpenDatePicker(false)
         }
     }
 
-    const filteredSessions =
-        selectedOptions.length !== 0
-            ? sessions.filter((item) => {
-                  const sessionDate = moment(new Date(item.startDate)).add(1, "day").format("dddd, MMMM Do, YYYY")
+    useEffect(() => {
+        document.addEventListener("mousedown", handleDatePickerClickOutside)
 
-                  return selectedOptions.includes(sessionDate)
-              })
-            : sessions
+        return () => {
+            document.removeEventListener("mousedown", handleDatePickerClickOutside)
+        }
+    }, [])
+    /* End DatePicker code */
 
-    const handleClickOutside = (e: MouseEvent) => {
-        const { current: wrap } = wraperRef as { current: HTMLElement | null }
+    const formatDates = (startDate: Date, endDate: Date) => {
+        const start = moment.utc(startDate)
+        const end = moment.utc(endDate)
 
-        if (wrap && !wrap.contains(e.target as Node)) {
-            setOpenFilterOptions(false)
+        if (start.month() === end.month()) {
+            const formattedDate = `${start.format("MMMM D")} - ${end.format("D")}`
+            return formattedDate
+        }
+        const formattedDate = `${start.format("MMMM D")} - ${end.format("MMMM D")}`
+        return formattedDate
+    }
+
+    const handleClickOutside = (event: any) => {
+        const { current: locationCurrent } = localtionRef as {
+            current: HTMLElement | null
+        }
+        if (locationCurrent && !locationCurrent.contains(event.target)) {
+            setOpenLocationFilter(false)
         }
     }
 
@@ -72,119 +126,152 @@ const EventPage = ({ event, sessions }: Props) => {
         }
     }, [])
 
+    useEffect(() => {
+        const locations = Array.from(new Set(sessions.map((item) => item.location)))
+        setLocationsOptions(locations)
+    }, [])
+
+    const handleCheckboxChangeLocation = (location: string) => {
+        if (selectedLocations.includes(location)) {
+            setSelectedLocations(selectedLocations.filter((selectedWeek) => selectedWeek !== location))
+        } else {
+            setSelectedLocations([...selectedLocations, location])
+        }
+    }
+
+    const filteredSessionsByLocation =
+        selectedLocations.length !== 0
+            ? filteredSessions.filter((item) => selectedLocations.includes(item.location))
+            : filteredSessions
+
+    const filterSpeakers = () => {
+        const speakers = sessions.map((item) => {
+            const sessionSpeakers = item.team_members.filter((item) => item.role === "Speaker").map((item) => item.name)
+            return sessionSpeakers
+        })
+        const uniqueSpeakers = Array.from(new Set(speakers.flat()))
+        setSpeakers(uniqueSpeakers)
+    }
+
+    useEffect(() => {
+        filterSpeakers()
+    }, [])
+
     return (
         <BaseTemplate>
-            <div className="flex flex-col border border-black p-5 bg-[#EEEEF0] gap-5 w-full h-full">
-                <div className="flex flex-col md:flex-row justify-between p-5 bg-white rounded-[8px]">
-                    <div className="flex items-center gap-2 mb-5 md:mb-0">
-                        <h1 className={`text-[#1C292899]`}>Program</h1>
+            <div className="flex flex-col p-5 bg-[#EEEEF0] gap-5 w-full h-full">
+                <div className="flex flex-col md:flex-row justify-between p-5 bg-white rounded-[16px]">
+                    <div className="flex items-center gap-2 mb-5 md:mb-0 text-[12px] md:text-[14px]">
+                        <Link href="/events">
+                            <a className={`text-[#1C292899]`}>Events</a>
+                        </Link>
                         <h1 className={`text-[#1C292899]`}>/</h1>
-                        <h1 className={`text-black font-[600]`}>ZK Week</h1>
+                        <h1 className={`text-black font-[600]`}>{`${event.name}`}</h1>
                     </div>
-                    <div className="flex flex-col md:flex-row gap-4 md:gap-[8px] items-center">
-                        <button className="bg-white border border-primary text-zulalu-primary font-[600] py-[8px] px-[16px] rounded-[8px] mb-4 md:mb-0">
-                            CONTACT ORGANIZERS
-                        </button>
-                        <a href={event.publicUrl} target="_blank">
-                            <div className="bg-zulalu-primary text-white py-[8px] px-[16px] rounded-[8px] gap-[8px] flex flex-row items-center justify-center hover:bg-zulalu-primary-light cursor-pointer mb-4 md:mb-0">
-                                <NextImage src={"/ticket.svg"} width={13} height={12} />
-                                <p>TICKETS</p>
+                    <div className="flex flex-col w-auto md:flex-row gap-4 md:gap-[8px] justify-end items-start md:items-center">
+                        <a className="w-full md:w-auto" href={event.apply_form} target="_blank">
+                            <div className="w-full md:w-auto justify-center text-center md:w-auto bg-white border border-primary py-[8px] px-[5px] md:px-[15px] text-zulalu-primary font-[600] rounded-[8px] text-[12px] md:text-[16px]">
+                                <p>APPLY NOW</p>
                             </div>
                         </a>
-                        {/* {session && session.data.user.user_metadata.event === event.name ? (
-                            <button
-                                className="text-[#F8FFFE] bg-[#35655F] rounded-[8px] flex flex-row justify-center items-center py-[8px] px-[16px] flex flex-row gap-[8px]"
-                                onClick={() => setUpdateEventModal(true)}
-                            >
-                                <NextImage src={"/pencil.svg"} width={13} height={12} />
-                                <p>EDIT</p>
-                            </button>
-                        ) : (
-                            ""
-                        )} */}
+                        <button className="w-full md:w-auto justify-center text-center bg-white border border-primary py-[8px] px-[5px] md:px-[15px] text-zulalu-primary font-[600] rounded-[8px] text-[12px] md:text-[16px]">
+                            CONTACT ORGANIZERS
+                        </button>
+                        <button className="w-full md:w-auto justify-center text-center flex gap-1 items-center bg-zulalu-primary text-white py-[8px] px-[5px] md:px-[15px] font-[600] rounded-[8px] text-[12px] md:text-[16px]">
+                            <NextImage src={"/ticket.svg"} width={13} height={12} />
+                            TICKETS COMING SOON
+                        </button>
                     </div>
                 </div>
-                <div className="flex flex-col md:flex-row w-full justify-start bg-white rounded-[8px] h-[682px]">
-                    <div className="flex h-full max-w-[1014px] w-full rounded-[8px]">
+                <div className="flex flex-col lg:flex-row w-full justify-start bg-white rounded-[16px] h-full">
+                    <div className="hidden md:flex h-full max-w-[1014px] w-full rounded-l-[16px] overflow-hidden">
                         <NextImage
-                            src="/event-image.png"
+                            src={event.image_url}
                             objectFit="cover"
                             alt="event-image"
                             width="1014px"
                             height="682px"
                         />
                     </div>
-                    <div className="flex flex-col w-full md:w-2/6 pl-5 pr-20">
+                    <div className="flex flex-col w-full lg:w-2/6 pl-5 pr-20 md:mb-0 mb-10">
                         <div className="flex my-5 w-full">
-                            <h1 className="text-black text-[52px] font-[600]">{`${event.name.substring(0, 30)}...`}</h1>
+                            <h1 className="text-black text-[52px] font-[600] leading-tight">{event.name}</h1>
                         </div>
                         <div className="flex flex-col w-full gap-4">
                             <div className="flex gap-1 items-center justify-start">
                                 <NextImage src={"/vector-calendar.svg"} alt="calendar" width={15} height={15} />
-                                <h1 className="text-zulalu-secondary">{formattedDate}</h1>
+                                <h1 className="text-zulalu-secondary">{formatDates(event.startDate, event.endDate)}</h1>
                             </div>
-                            <h1>
-                                Join us for presentations, workshops, and roundtables to discuss beginner ZK, ZK for
-                                biohackers, new proving systems and more.
-                            </h1>
+                            <h1>{event.info}</h1>
                         </div>
                         <div className="flex flex-col mt-10 gap-5">
                             <h1 className="text-black text-[24px]">Speakers</h1>
 
-                            <div className="flex flex-wrap">
-                                {event.organizers?.map((organizer, idx) => (
+                            <div className="flex flex-wrap gap-[24px]">
+                                {speakers.map((speaker, idx) => (
                                     <div className="flex gap-2 bg-gray-200 rounded-[4px] px-3 py-1" key={idx}>
                                         <img src="/user-icon-4.svg" className="w-[24px] h-[24px]" />
-                                        <h1 className="capitalize">{organizer}</h1>
+                                        <h1 className="capitalize">{speaker}</h1>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className="flex flex-col items-center pt-[16px] px-[32px] pb-[40px] bg-white gap-[8px] rounded-[8px]">
-                    <div className="w-full flex flex-col md:flex-row justify-between items-center p-[16px] gap-[24px]">
-                        <div className="flex flex-col md:flex-row items-center justify-center gap-[32px] mb-5 md:mb-0">
-                            <h1 className="text-[40px] text-[#37352F] font-[600]">Sessions</h1>
+                <div className="flex md:hidden h-full max-w-[1014px] w-full rounded-[16px] overflow-hidden">
+                    <NextImage
+                        src={event.image_url}
+                        objectFit="cover"
+                        alt="event-image"
+                        width="1014px"
+                        height="682px"
+                    />
+                </div>
+                {isAuth && isOrganizer && (
+                    <button
+                        className="flex md:hidden flex-row font-[600] w-full justify-center items-center py-[8px] px-[16px] gap-[8px] bg-[#35655F] rounded-[8px] text-white text-[16px]"
+                        onClick={() => setOpenAddSessionModal(true)}
+                    >
+                        CREATE SESSION
+                    </button>
+                )}
+                <div className="flex flex-col items-center pt-[16px] px-[18px] md:px-[32px] pb-[40px] bg-white gap-[8px] rounded-[16px]">
+                    <div className="w-full flex flex-col md:flex-row justify-between items-start md:items-center p-0 md:p-[16px] gap-[24px]">
+                        <h1 className="text-[24px] md:text-[40px] text-[#37352F] font-[600]">Sessions</h1>
+                        {isAuth && isOrganizer && (
                             <button
-                                className="flex flex-row font-[600] justify-center items-center py-[8px] px-[16px] gap-[8px] bg-[#35655F] rounded-[8px] text-white text-[16px]"
+                                className="hidden md:flex flex-row font-[600] w-[300px] justify-center items-center py-[8px] px-[16px] gap-[8px] bg-[#35655F] rounded-[8px] text-white text-[16px]"
                                 onClick={() => setOpenAddSessionModal(true)}
                             >
                                 CREATE SESSION
                             </button>
-                            <AddSessionModal
-                                closeModal={setOpenAddSessionModal}
-                                isOpen={openAddSessionModal}
-                                event={event}
-                                sessions={sessions}
-                            />
-                        </div>
-                        <div className="flex flex-col md:flex-row justify-center items-center gap-5">
-                            <button
-                                onClick={() => setSelectedOptions([])}
-                                className="bg-white border border-primary text-zulalu-primary font-[600] py-[8px] px-[16px] gap-[8px] text-[16px] rounded-[8px] flex flex-row justify-center items-center mb-5 md:mb-0"
-                            >
-                                <p>ALL SESSIONS</p>
-                                <NextImage src={"/arrow-down.svg"} width={8} height={4} />
-                            </button>
-                            <div className="flex flex-col relative w-[auto]" ref={wraperRef}>
+                        )}
+                        <AddSessionModal
+                            closeModal={setOpenAddSessionModal}
+                            isOpen={openAddSessionModal}
+                            event={event}
+                            sessions={allSessions}
+                        />
+                        <div className="flex flex-col md:flex-row justify-center md:justify-end items:start md:items-center gap-2 md:gap-2 w-full">
+                            <div className="flex flex-col relative w-full md:w-[150px]" ref={localtionRef}>
                                 <button
-                                    onClick={() => setOpenFilterOptions(!openFilterOptions)}
+                                    onClick={() => setOpenLocationFilter(!openLocationFilter)}
                                     className="flex justify-between uppercase bg-white border border-primary text-zulalu-primary font-[600] py-[8px] px-[16px] gap-[8px] text-[16px] rounded-[8px] flex flex-row justify-center items-center"
                                 >
-                                    <p>{formattedDate}</p>
+                                    <p>Location</p>
                                     <NextImage src={"/arrow-down.svg"} width={8} height={4} />
                                 </button>
-                                {openFilterOptions && (
+
+                                {openLocationFilter && (
                                     <div className="flex z-[10] flex-col gap-3 bg-white border w-full py-[8px] px-[16px] border-primary absolute top-[45px] text-zulalu-primary rounded-[8px]">
-                                        {dateOptions.map((item, index) => (
+                                        {locationsOptions.map((item, index) => (
                                             <label key={index} className="flex w-full items-center gap-2 capitalize">
                                                 <input
                                                     type="checkbox"
                                                     name="checkbox"
                                                     value="value"
-                                                    checked={selectedOptions.includes(item)}
-                                                    onChange={() => handleOptionChange(item)}
+                                                    checked={selectedLocations.includes(item)}
+                                                    onChange={() => handleCheckboxChangeLocation(item)}
                                                 />
                                                 {item}
                                             </label>
@@ -192,22 +279,34 @@ const EventPage = ({ event, sessions }: Props) => {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Begin DatePicker Filter */}
+                            <div className="flex flex-col w-auto min-w-[200px]" ref={datePickerWrapperRef}>
+                                <button
+                                    onClick={toggleDatePicker}
+                                    className="flex justify-between uppercase bg-white border border-primary text-zulalu-primary font-[600] py-[8px] px-[16px] gap-[8px] text-[16px] rounded-[8px] flex flex-row justify-center items-center"
+                                >
+                                    <p>{datePickerDescription}</p>
+                                    <NextImage src="/arrow-down.svg" width={8} height={4} />
+                                </button>
+
+                                {openDatePicker && (
+                                    <div className="relative">
+                                        <div className="absolute right-0 top-2 z-10 p-0">
+                                            <StyledDatePicker
+                                                onChange={handleDateSelection}
+                                                startDate={datePickerStartDate}
+                                                endDate={datePickerEndDate}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            {/* End DatePicker Filter */}
                         </div>
                     </div>
-                    <Sessions event={event} sessions={filteredSessions} />
+                    <Sessions event={event} sessions={filteredSessionsByLocation} />
                 </div>
-                <ToastContainer
-                    position="top-center"
-                    autoClose={3000}
-                    hideProgressBar={false}
-                    newestOnTop={false}
-                    closeOnClick
-                    rtl={false}
-                    pauseOnFocusLoss
-                    draggable
-                    pauseOnHover
-                    theme="light"
-                />
             </div>
         </BaseTemplate>
     )
