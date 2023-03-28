@@ -1,7 +1,7 @@
 import "react-autocomplete-input/dist/bundle.css"
 import "react-datepicker/dist/react-datepicker.css"
 import { Dialog, Transition } from "@headlessui/react"
-import { ToastContainer, toast } from "react-toastify"
+import { toast } from "react-toastify"
 import { useRouter } from "next/router"
 import { Fragment, useRef, useState } from "react"
 import axios from "axios"
@@ -26,7 +26,6 @@ type NewSessionState = {
     name: string
     startDate: Date
     startTime: string
-    subevent_id: number
     tags: string[]
     team_members: {
         name: string
@@ -34,6 +33,7 @@ type NewSessionState = {
     }[]
     track: string
     event_slug: string
+    duration: string
     event_item_id: number
 }
 
@@ -55,22 +55,21 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions }: Props) =
         team_members: [],
         startDate: new Date(),
         startTime: "00",
-        location: "Amphitheater",
+        location: "",
         tags: [],
         info: "",
         event_id: 97,
         hasTicket: false,
+        duration: "0",
         format: "Live",
         level: "Beginner",
         equipment: "",
         track: "ZK Week",
         event_type: "Workshop",
         event_slug: "CoordiNations",
-        event_item_id: 111,
-        subevent_id: 0
+        event_item_id: 111
     })
 
-    console.log("selected params", newSession.event_id, newSession.event_slug, newSession.event_item_id)
     const [amountTickets, setAmountTickets] = useState("0")
 
     const handleSubmit = async () => {
@@ -104,7 +103,8 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions }: Props) =
                 const createEventDB = await axios.post("/api/createSession", {
                     ...newSession,
                     subEventId: subEventRes.data.id,
-                    startTime: formattedTime
+                    startTime: formattedTime,
+                    quota_id: quotaCreatedRes.data.id
                 })
                 console.log("DB response: ", createEventDB)
             } else {
@@ -143,6 +143,7 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions }: Props) =
             location: "Amphitheater",
             tags: [],
             info: "",
+            duration: "0",
             event_id: 97,
             hasTicket: false,
             format: "Live",
@@ -151,8 +152,7 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions }: Props) =
             track: "ZK Week",
             event_type: "Workshop",
             event_slug: "CoordiNations",
-            event_item_id: 111,
-            subevent_id: 0
+            event_item_id: 111
         })
         closeModal(false)
     }
@@ -186,10 +186,18 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions }: Props) =
                             <Dialog.Panel className="flex flex-col h-full w-5/6 overflow-y-scroll max-w-full transform rounded-lg bg-white text-left align-middle  transition-all">
                                 <div className="w-full h-full py-5 px-10">
                                     <div className="flex w-full justify-between items-center">
-                                        <h1 className="text-[24px] font-[600]">Session Info (for the public)</h1>
+                                        <h1 className="text-[24px] font-[600]">
+                                            {steps === 1
+                                                ? "Select Subevent"
+                                                : steps === 2
+                                                ? "Session info (for the public)"
+                                                : steps === 3
+                                                ? "Session Logistics (for organizers)"
+                                                : "Review Session"}
+                                        </h1>
                                         <div
                                             onClick={() => closeModal(false)}
-                                            className="cursor-pointer flex items-center border-2 border-black justify-center w-[25px] h-[25px] rounded-full"
+                                            className="cursor-pointer flex p-4 items-center border-2 border-black justify-center w-[25px] h-[25px] rounded-full"
                                         >
                                             X
                                         </div>
