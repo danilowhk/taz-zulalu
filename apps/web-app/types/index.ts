@@ -5,7 +5,8 @@ export interface UserDTO {
     id: number
     semaphoreId: string
     userName: string
-    uui_auth: string
+    url: string
+    publicUrl: string
 }
 
 export interface EventsDTO {
@@ -25,9 +26,6 @@ export interface EventsDTO {
     type: String
     sessions: SessionsDTO[]
     item_id: number
-    image_url: string
-    bg_image_url: string
-    apply_form: string
 }
 
 export interface SessionsDTO {
@@ -41,7 +39,6 @@ export interface SessionsDTO {
     favoritedSessions: FavoritedSessionsDTO[]
     favorited_sessions: any
     format: string
-    duration: string
     hasTicket: boolean
     id: number
     info: string
@@ -60,16 +57,6 @@ export interface SessionsDTO {
     track: string
     endTime: any
     type: any
-    events: EventsDTO
-    quota_id: number
-    creator_uuid: string
-}
-
-export interface RsvpDTO {
-    id: number
-    created_at: Date
-    session_id: number
-    user_id: number
 }
 
 export interface ParticipantsDTO {

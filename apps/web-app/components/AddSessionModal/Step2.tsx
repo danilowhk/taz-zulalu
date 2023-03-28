@@ -7,7 +7,6 @@ type NewSessionState = {
     equipment: string
     event_id: number
     event_item_id: number
-    duration: string
     event_slug: string
     event_type: string
     format: string
@@ -18,6 +17,7 @@ type NewSessionState = {
     name: string
     startDate: Date
     startTime: string
+    subevent_id: number
     tags: string[]
     team_members: {
         name: string
