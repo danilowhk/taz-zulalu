@@ -14,7 +14,7 @@ const MainSection = () => (
                     healthier lives, and build self-sustaining communities.
                 </h1>
             </div>
-            <div className="p-5 relative w-full lg:w-3/6 h-[500px] w-full flex justify-center items-center">
+            <div className="p-5 relative w-full lg:w-3/6 h-[500px] flex justify-center items-center">
                 <div className="absolute z-[10]  bottom-0 border border-black w-[550px] h-[300px] bg-eventbg2 filter blur-[150px] z-[1]" />
                 <div className="absolute z-[9]  border border-black w-[500px] h-[379px] bg-eventbg1 filter blur-[150px] z-[1]" />
 
