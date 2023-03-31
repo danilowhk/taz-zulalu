@@ -216,7 +216,7 @@ const CalendarPageSessions = ({ sessions, showStartDate = false }: Props) => {
                                                             width={16}
                                                             height={16}
                                                         />
-                                                        <p className="text-[#708E8C] text-[18px]">{`${startTimeFormatted}:${endTimeFormatted}`}</p>
+                                                        <p className="text-[#708E8C] text-[18px]">{`${startTimeFormatted} to ${endTimeFormatted}`}</p>
                                                     </div>
                                                     <div className="flex flex-row items-center gap-[8px] border-b border-[#708E8C] text-[#708E8C]">
                                                         <NextImage
