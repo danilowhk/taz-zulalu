@@ -32,7 +32,8 @@ const CalendarPage = ({ sessions, events }: Props) => {
     /* Begin DatePicker code */
     const [openDatePicker, setOpenDatePicker] = useState(false)
     const [datePickerDescription, setDatePickerDescription] = useState("FULL PROGRAM")
-    const [filteredSessions, setFilteredSessions] = useState<SessionsDTO[]>(sessions)
+    // const [filteredSessions, setFilteredSessions] = useState<SessionsDTO[]>(sessions)
+    const [filteredSessions, setFilteredSessions] = useState<SessionsDTO[]>([]) // Initialize with an empty array
     const [datePickerStartDate, setDatePickerStartDate] = useState<Date | null>(null)
     const [datePickerEndDate, setDatePickerEndDate] = useState<Date | null>(null)
     const datePickerWrapperRef = useRef(null)
@@ -42,7 +43,6 @@ const CalendarPage = ({ sessions, events }: Props) => {
     }
 
     const handleDateSelection = (selectedDates: [Date | null, Date | null]) => {
-        // Filter sessions
         const [start, end] = selectedDates.map((date) => (date ? moment.utc(date).startOf("day").toDate() : null))
         setDatePickerStartDate(start)
         setDatePickerEndDate(end)
@@ -85,6 +85,16 @@ const CalendarPage = ({ sessions, events }: Props) => {
             setOpenDatePicker(false)
         }
     }
+
+    useEffect(() => {
+        const today = moment.utc().startOf("day").toDate()
+        const filtered = sessions.filter((session) => {
+            const sessionDate = moment.utc(session.startDate).startOf("day").toDate() // Remove time part for date comparison
+            return today <= sessionDate
+        })
+        setFilteredSessions(filtered)
+        setDatePickerDescription("TODAY ONWARD")
+    }, [])
 
     useEffect(() => {
         document.addEventListener("mousedown", handleDatePickerClickOutside)
