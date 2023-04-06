@@ -106,11 +106,11 @@ const Header = () => {
                             Zuzalu Passport
                         </li>
                     </a>
-                    {!userInfo && (
+                    {/* {!userInfo && (
                         <a href="https://airtable.com/shrRZrZbozPE2g6HH" target="_blank" rel="noopener noreferrer">
                             <li className="cursor-pointer font-[400] text-[18px] text-[#F8FFFE]">Apply Now</li>
                         </a>
-                    )}
+                    )} */}
                     {userInfo ? (
                         <li
                             className={`cursor-pointer text-[#F8FFFE] text-[18px] ${
