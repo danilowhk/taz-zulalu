@@ -29,7 +29,7 @@ const EventPage = ({ event, sessions, allSessions }: Props) => {
 
     const [openLocationFilter, setOpenLocationFilter] = useState(false)
 
-    const isOrganizer = userRole === "resident"
+    const isOrganizer = userRole === "organizer"
 
     /* Begin DatePicker code */
     const [openDatePicker, setOpenDatePicker] = useState(false)
@@ -201,10 +201,10 @@ const EventPage = ({ event, sessions, allSessions }: Props) => {
                             CONTACT ORGANIZERS
                         </button>
                         <a href={event.publicUrl} target="_blank">
-                        <button className="w-full md:w-auto justify-center text-center flex gap-1 items-center bg-zulalu-primary text-white py-[8px] px-[5px] md:px-[15px] font-[600] rounded-[8px] text-[12px] md:text-[16px]">
-                            <NextImage src={"/ticket.svg"} width={13} height={12} />
-                            BUY TICKET
-                        </button>
+                            <button className="w-full md:w-auto justify-center text-center flex gap-1 items-center bg-zulalu-primary text-white py-[8px] px-[5px] md:px-[15px] font-[600] rounded-[8px] text-[12px] md:text-[16px]">
+                                <NextImage src={"/ticket.svg"} width={13} height={12} />
+                                BUY TICKET
+                            </button>
                         </a>
                     </div>
                 </div>
@@ -255,7 +255,7 @@ const EventPage = ({ event, sessions, allSessions }: Props) => {
                         height="682px"
                     />
                 </div>
-                {userInfo && (
+                {userInfo && isOrganizer && (
                     <button
                         className="flex md:hidden flex-row font-[600] w-full justify-center items-center py-[8px] px-[16px] gap-[8px] bg-[#35655F] rounded-[8px] text-white text-[16px]"
                         onClick={() => setOpenAddSessionModal(true)}
@@ -266,7 +266,7 @@ const EventPage = ({ event, sessions, allSessions }: Props) => {
                 <div className="flex flex-col items-center pt-[16px] px-[18px] md:px-[32px] pb-[40px] bg-white gap-[8px] rounded-[16px]">
                     <div className="w-full flex flex-col md:flex-row justify-between items-start md:items-center p-0 md:p-[16px] gap-[24px]">
                         <h1 className="text-[24px] md:text-[40px] text-[#37352F] font-[600]">Sessions</h1>
-                        {userInfo && (
+                        {userInfo && isOrganizer && (
                             <button
                                 className="hidden md:flex flex-row font-[600] w-[300px] justify-center items-center py-[8px] px-[16px] gap-[8px] bg-[#35655F] rounded-[8px] text-white text-[16px]"
                                 onClick={() => setOpenAddSessionModal(true)}
