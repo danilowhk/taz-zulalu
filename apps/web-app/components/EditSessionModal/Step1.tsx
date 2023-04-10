@@ -47,6 +47,7 @@ type Props = {
     setNewSession: (newEvent: NewSessionState) => void
     setSteps: (steps: number) => void
     sessions: SessionsDTO[]
+    sessionId: number
 }
 
 // @ts-ignore
@@ -57,7 +58,7 @@ const loadEditor: Loader<EditorProps> = async () => {
 
 const Editor = dynamic<EditorProps>(loadEditor, { ssr: false })
 
-const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
+const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Props) => {
     const {
         name,
         team_members,
@@ -66,7 +67,6 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
         format,
         tags,
         track,
-        startDate,
         location,
         custom_location,
         startTime,
@@ -238,7 +238,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
 
         const selectedLocation = newSession.location.toLocaleLowerCase()
 
-        const filteredSeshs = sessions
+        let filteredSeshs = sessions
             .filter((item) => item.location.toLocaleLowerCase() === selectedLocation)
             .filter((item) => {
                 const formatDate = moment.utc(newSession.startDate).format("YYYY-MM-DD")
@@ -248,6 +248,8 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
 
                 return selectedDate.isSame(newSessionStartDate)
             })
+
+        filteredSeshs = filteredSeshs.filter((item) => item.id !== sessionId)
 
         if (isOverlapping({ filteredSeshs })) {
             return toast.error("Session already booked on that Date and Time.", {
