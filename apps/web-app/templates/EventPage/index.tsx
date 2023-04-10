@@ -244,7 +244,6 @@ const EventPage = ({ event, sessions, allSessions }: Props) => {
                                         className="flex gap-2 bg-gray-200 text-[10px] justify-center items-center rounded-[4px] px-3 py-1"
                                         key={idx}
                                     >
-                                        {/* <img src="/user-icon-4.svg" className="w-[24px] h-[24px]" /> */}
                                         {generateIdenticon(speaker, 24)}
                                         <h1 className="capitalize">{speaker}</h1>
                                     </div>
