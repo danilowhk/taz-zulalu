@@ -14,6 +14,7 @@ import MaskedInput from "react-text-mask"
 import { EditorProps } from "react-draft-wysiwyg"
 
 import { TracksDTO, FormatDTO, LevelDTO, LocationDTO, EventTypeDTO, SessionsDTO } from "../../types"
+import SlotsAvailableModal from "../SlotsAvailableModal"
 
 type NewSessionState = {
     description: string
@@ -65,6 +66,8 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
         event_type,
         level,
         format,
+        event_id,
+        startDate,
         tags,
         track,
         location,
@@ -81,6 +84,8 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
     const [levelsOpt, setLevelsOpt] = useState<LevelDTO[]>()
     const [locationsOpt, setLocationsOpt] = useState<LocationDTO[]>()
     const [eventTypesOpt, setEventTypesOpt] = useState<EventTypeDTO[]>()
+    const [openSlotsModal, setOpenSlotsModal] = useState(false)
+    const [filteredSessionsModal, setFilteredSessionsModal] = useState<SessionsDTO[]>([])
 
     const wraperRef = useRef(null)
 
@@ -268,8 +273,32 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
         setSteps(2)
     }
 
+    const handleOpenSlotsAvailable = () => {
+        const selectedLocation = newSession.location.toLocaleLowerCase()
+
+        const filteredSeshs = sessions
+            .filter((item) => item.location.toLocaleLowerCase() === selectedLocation)
+            .filter((item) => {
+                const formatDate = moment.utc(newSession.startDate).format("YYYY-MM-DD")
+
+                const selectedDate = moment.utc(formatDate)
+                const newSessionStartDate = moment.utc(item.startDate)
+
+                return selectedDate.isSame(newSessionStartDate)
+            })
+
+        setFilteredSessionsModal(filteredSeshs)
+    }
+
     return (
         <div className="flex flex-col w-full">
+            <SlotsAvailableModal
+                closeModal={setOpenSlotsModal}
+                isOpen={openSlotsModal}
+                sessions={filteredSessionsModal}
+                startDate={startDate}
+                location={location}
+            />
             <ToastContainer
                 position="top-center"
                 autoClose={3000}
@@ -361,6 +390,20 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
                     onChange={(e) => setNewSession({ ...newSession, startDate: e as Date })}
                 />
             </div>
+
+            {startDate && location && location !== "Other" && event_id !== 101 && (
+                <div className="flex flex-col justify-start my-2">
+                    <button
+                        onClick={() => {
+                            handleOpenSlotsAvailable()
+                            setOpenSlotsModal(true)
+                        }}
+                        className="flex flex-row font-[600] w-full justify-center items-center py-[8px] px-[16px] gap-[8px] bg-[#35655F] rounded-[8px] text-white text-[16px]"
+                    >
+                        Check Unavailable Slots ({moment.utc(startDate).format("MM/DD/YYYY")})
+                    </button>
+                </div>
+            )}
 
             <div className="flex flex-row w-full gap-5 my-2">
                 <div className="flex flex-col w-3/6">
