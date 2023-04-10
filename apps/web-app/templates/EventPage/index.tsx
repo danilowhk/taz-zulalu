@@ -29,7 +29,9 @@ const EventPage = ({ event, sessions, allSessions }: Props) => {
 
     const [openLocationFilter, setOpenLocationFilter] = useState(false)
 
-    const isOrganizer = userRole === "organizer"
+    // const isOrganizer = userRole === "organizer"
+    const isOrganizer = true
+
 
     /* Begin DatePicker code */
     const [openDatePicker, setOpenDatePicker] = useState(false)
