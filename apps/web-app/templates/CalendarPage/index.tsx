@@ -27,12 +27,15 @@ const CalendarPage = ({ sessions, events }: Props) => {
     const [openContactModal, setOpenContactModal] = useState(false)
 
     const [openLocationFilter, setOpenLocationFilter] = useState(false)
-    const isOrganizer = userRole === "resident"
+    // const isOrganizer = userRole === "organizer"
+    const isOrganizer = true
+
 
     /* Begin DatePicker code */
     const [openDatePicker, setOpenDatePicker] = useState(false)
     const [datePickerDescription, setDatePickerDescription] = useState("FULL PROGRAM")
-    const [filteredSessions, setFilteredSessions] = useState<SessionsDTO[]>(sessions)
+    // const [filteredSessions, setFilteredSessions] = useState<SessionsDTO[]>(sessions)
+    const [filteredSessions, setFilteredSessions] = useState<SessionsDTO[]>([]) // Initialize with an empty array
     const [datePickerStartDate, setDatePickerStartDate] = useState<Date | null>(null)
     const [datePickerEndDate, setDatePickerEndDate] = useState<Date | null>(null)
     const datePickerWrapperRef = useRef(null)
@@ -42,7 +45,6 @@ const CalendarPage = ({ sessions, events }: Props) => {
     }
 
     const handleDateSelection = (selectedDates: [Date | null, Date | null]) => {
-        // Filter sessions
         const [start, end] = selectedDates.map((date) => (date ? moment.utc(date).startOf("day").toDate() : null))
         setDatePickerStartDate(start)
         setDatePickerEndDate(end)
@@ -85,6 +87,16 @@ const CalendarPage = ({ sessions, events }: Props) => {
             setOpenDatePicker(false)
         }
     }
+
+    useEffect(() => {
+        const today = moment.utc().startOf("day").toDate()
+        const filtered = sessions.filter((session) => {
+            const sessionDate = moment.utc(session.startDate).startOf("day").toDate() // Remove time part for date comparison
+            return today <= sessionDate
+        })
+        setFilteredSessions(filtered)
+        setDatePickerDescription("TODAY ONWARD")
+    }, [])
 
     useEffect(() => {
         document.addEventListener("mousedown", handleDatePickerClickOutside)
@@ -177,7 +189,7 @@ const CalendarPage = ({ sessions, events }: Props) => {
                     </div>
                 </div>
 
-                {userInfo ? (
+                {userInfo && isOrganizer ? (
                     <>
                         <button
                             className="flex md:hidden w-full flex-row font-[600] justify-center items-center py-[8px] px-[16px] gap-[8px] bg-[#35655F] rounded-[8px] text-white text-[16px]"
@@ -220,7 +232,7 @@ const CalendarPage = ({ sessions, events }: Props) => {
                         <div className="flex flex-col md:flex-row items-start md:items-center justify-center gap-[32px]">
                             <h1 className="text-[24px] md:text-[40px] text-[#37352F] font-[600]">Sessions</h1>
 
-                            {userInfo ? (
+                            {userInfo && isOrganizer ? (
                                 <>
                                     <button
                                         className="hidden md:flex flex-row font-[600] justify-center items-center py-[8px] px-[16px] gap-[8px] bg-[#35655F] rounded-[8px] text-white text-[16px]"
@@ -239,96 +251,80 @@ const CalendarPage = ({ sessions, events }: Props) => {
                                 ""
                             )}
                         </div>
-                        {userInfo && (
-                            <div className="flex flex-col md:flex-row justify-center items-start md:items-start gap-5 w-full md:w-auto">
-                                <div className="flex flex-col relative w-full md:w-[150px]" ref={localtionRef}>
-                                    <button
-                                        onClick={() => setOpenLocationFilter(!openLocationFilter)}
-                                        className="flex justify-between uppercase bg-white border border-primary text-zulalu-primary font-[600] py-[8px] px-[16px] gap-[8px] text-[16px] rounded-[8px] flex flex-row justify-center items-center"
-                                    >
-                                        <p>Location</p>
-                                        <NextImage src={"/arrow-down.svg"} width={8} height={4} />
-                                    </button>
 
-                                    {openLocationFilter && (
-                                        <div className="flex z-[10] flex-col gap-3 bg-white border w-full py-[8px] px-[16px] border-primary absolute top-[45px] text-zulalu-primary rounded-[8px]">
-                                            {locationsOptions.map((item, index) => (
-                                                <label
-                                                    key={index}
-                                                    className="flex w-full items-center gap-2 capitalize"
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        name="checkbox"
-                                                        value="value"
-                                                        checked={selectedLocations.includes(item)}
-                                                        onChange={() => handleCheckboxChangeLocation(item)}
-                                                    />
-                                                    {item}
-                                                </label>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
+                        <div className="flex flex-col md:flex-row justify-center items-start md:items-start gap-5 w-full md:w-auto">
+                            <div className="flex flex-col relative w-full md:w-[150px]" ref={localtionRef}>
                                 <button
-                                    onClick={() => {
-                                        setSelectedLocations([])
-                                        setFilteredSessions(sessions)
-                                        setDatePickerDescription("FULL PROGRAM")
-                                    }}
-                                    className="bg-white border w-full md:w-auto border-primary text-zulalu-primary font-[600] py-[8px] px-[16px] gap-[8px] text-[16px] rounded-[8px] flex flex-row justify-between md:justify-center items-center"
+                                    onClick={() => setOpenLocationFilter(!openLocationFilter)}
+                                    className="flex justify-between uppercase bg-white border border-primary text-zulalu-primary font-[600] py-[8px] px-[16px] gap-[8px] text-[16px] rounded-[8px] flex flex-row justify-center items-center"
                                 >
-                                    <p>CLEAR FILTER</p>
-                                    {/* <NextImage src={"/arrow-down.svg"} width={8} height={4} /> */}
+                                    <p>Location</p>
+                                    <NextImage src={"/arrow-down.svg"} width={8} height={4} />
                                 </button>
-                                {/* Begin DatePicker Filter */}
-                                <div className="flex flex-col w-auto min-w-[200px]" ref={datePickerWrapperRef}>
-                                    <button
-                                        onClick={toggleDatePicker}
-                                        className="flex justify-between uppercase bg-white border border-primary text-zulalu-primary font-[600] py-[8px] px-[16px] gap-[8px] text-[16px] rounded-[8px] flex flex-row justify-center items-center"
-                                    >
-                                        <p>{datePickerDescription}</p>
-                                        <NextImage src="/arrow-down.svg" width={8} height={4} />
-                                    </button>
 
-                                    {openDatePicker && (
-                                        <div className="relative">
-                                            <div className="absolute right-0 top-2 z-10 p-0">
-                                                <StyledDatePicker
-                                                    onChange={handleDateSelection}
-                                                    startDate={datePickerStartDate}
-                                                    endDate={datePickerEndDate}
+                                {openLocationFilter && (
+                                    <div className="flex z-[10] flex-col gap-3 bg-white border w-full py-[8px] px-[16px] border-primary absolute top-[45px] text-zulalu-primary rounded-[8px]">
+                                        {locationsOptions.map((item, index) => (
+                                            <label key={index} className="flex w-full items-center gap-2 capitalize">
+                                                <input
+                                                    type="checkbox"
+                                                    name="checkbox"
+                                                    value="value"
+                                                    checked={selectedLocations.includes(item)}
+                                                    onChange={() => handleCheckboxChangeLocation(item)}
                                                 />
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                                {/* End DatePicker Filter */}
-                                <button
-                                    onClick={() => {
-                                        handleClickToFilterByTodayDate()
-                                    }}
-                                    className="bg-[#D3DDDC] w-full md:w-auto text-[#1C2928] font-[600] py-[8px] px-[16px] gap-[8px] text-[16px] rounded-[8px] flex flex-row justify-between md:justify-center items-center"
-                                >
-                                    <p>TODAY</p>
-                                </button>
+                                                {item}
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-                        )}
+                            <button
+                                onClick={() => {
+                                    setSelectedLocations([])
+                                    setFilteredSessions(sessions)
+                                    setDatePickerDescription("FULL PROGRAM")
+                                }}
+                                className="bg-white border w-full md:w-auto border-primary text-zulalu-primary font-[600] py-[8px] px-[16px] gap-[8px] text-[16px] rounded-[8px] flex flex-row justify-between md:justify-center items-center"
+                            >
+                                <p>CLEAR FILTER</p>
+                                {/* <NextImage src={"/arrow-down.svg"} width={8} height={4} /> */}
+                            </button>
+                            {/* Begin DatePicker Filter */}
+                            <div className="flex flex-col w-auto min-w-[200px]" ref={datePickerWrapperRef}>
+                                <button
+                                    onClick={toggleDatePicker}
+                                    className="flex justify-between uppercase bg-white border border-primary text-zulalu-primary font-[600] py-[8px] px-[16px] gap-[8px] text-[16px] rounded-[8px] flex flex-row justify-center items-center"
+                                >
+                                    <p>{datePickerDescription}</p>
+                                    <NextImage src="/arrow-down.svg" width={8} height={4} />
+                                </button>
+
+                                {openDatePicker && (
+                                    <div className="relative">
+                                        <div className="absolute right-0 top-2 z-10 p-0">
+                                            <StyledDatePicker
+                                                onChange={handleDateSelection}
+                                                startDate={datePickerStartDate}
+                                                endDate={datePickerEndDate}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            {/* End DatePicker Filter */}
+                            <button
+                                onClick={() => {
+                                    handleClickToFilterByTodayDate()
+                                }}
+                                className="bg-[#D3DDDC] w-full md:w-auto text-[#1C2928] font-[600] py-[8px] px-[16px] gap-[8px] text-[16px] rounded-[8px] flex flex-row justify-between md:justify-center items-center"
+                            >
+                                <p>TODAY</p>
+                            </button>
+                        </div>
                     </div>
 
-                    {userInfo && <CalendarPageSessions sessions={filteredSessionsByLocation} />}
-
-                    {/* {!userInfo && (
-                        <div className="flex flex-col items-center justify-center w-full h-full mb-10">
-                            You need to be connected to see the sessions.
-                        </div>
-                    )} */}
-
-                    {!userInfo && (
-                        <div className="bg-gray-200 px-5 py-6 rounded-md">
-                            <p className="text-center">You need to connect your Passport to see the sessions.</p>
-                        </div>
-                    )}
+                    <CalendarPageSessions sessions={filteredSessionsByLocation} />
 
                     <ContactModal isOpen={openContactModal} closeModal={setOpenContactModal} />
                 </div>

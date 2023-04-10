@@ -1,13 +1,19 @@
 /* eslint-disable prefer-const */
 
-import { useEffect, useRef, useState } from "react"
+import { ComponentType, useEffect, useRef, useState } from "react"
+import dynamic, { Loader } from "next/dynamic"
 import DatePicker from "react-datepicker"
 import axios from "axios"
 import moment from "moment"
 import { ToastContainer, toast } from "react-toastify"
 import NextImage from "next/image"
+import { EditorState } from "draft-js"
+import { stateToHTML } from "draft-js-export-html"
+import { stateFromHTML } from "draft-js-import-html"
+import MaskedInput from "react-text-mask"
+import { EditorProps } from "react-draft-wysiwyg"
 
-import { UserDTO, TracksDTO, FormatDTO, LevelDTO, LocationDTO, EventTypeDTO, SessionsDTO } from "../../types"
+import { TracksDTO, FormatDTO, LevelDTO, LocationDTO, EventTypeDTO, SessionsDTO } from "../../types"
 
 type NewSessionState = {
     description: string
@@ -41,11 +47,31 @@ type Props = {
     setNewSession: (newEvent: NewSessionState) => void
     setSteps: (steps: number) => void
     sessions: SessionsDTO[]
+    sessionId: number
 }
 
-const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
-    const { name, team_members, startDate, event_type, level, format, startTime, location, tags, description, track } =
-        newSession
+// @ts-ignore
+const loadEditor: Loader<EditorProps> = async () => {
+    const mod = await import("react-draft-wysiwyg")
+    return mod.Editor as ComponentType<EditorProps>
+}
+
+const Editor = dynamic<EditorProps>(loadEditor, { ssr: false })
+
+const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Props) => {
+    const {
+        name,
+        team_members,
+        event_type,
+        level,
+        format,
+        tags,
+        track,
+        location,
+        custom_location,
+        startTime,
+        duration
+    } = newSession
     const [teamMember, setTeamMember] = useState({ name: "", role: "Speaker" })
     const [tag, setTag] = useState("")
     const [rerender, setRerender] = useState(true)
@@ -56,53 +82,18 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
     const [locationsOpt, setLocationsOpt] = useState<LocationDTO[]>()
     const [eventTypesOpt, setEventTypesOpt] = useState<EventTypeDTO[]>()
 
-    const [durationsOpt, setDurationsOpt] = useState([
-        {
-            time: "15",
-            disabled: false
-        },
-        {
-            time: "30",
-            disabled: false
-        },
-        {
-            time: "45",
-            disabled: false
-        },
-        {
-            time: "60",
-            disabled: false
-        },
-        {
-            time: "75",
-            disabled: false
-        },
-        {
-            time: "90",
-            disabled: false
-        },
-        {
-            time: "105",
-            disabled: false
-        },
-        {
-            time: "120",
-            disabled: false
-        }
-    ])
-
-    const [slotsUnavailable, setSlotsUnavailable] = useState(
-        Array.from(Array(45), (_, index) => {
-            const hour = Math.floor(index / 4) + 9
-            const minute = (index % 4) * 15
-            return {
-                time: `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`,
-                disabled: false
-            }
-        })
-    )
-
     const wraperRef = useRef(null)
+
+    const contentState = stateFromHTML(newSession.description)
+
+    const [richTextEditor, setRichTextEditor] = useState<EditorState>(EditorState.createWithContent(contentState))
+
+    const onEditorStateChange = (editorState: EditorState) => {
+        setRichTextEditor(editorState)
+        const html = stateToHTML(editorState.getCurrentContent())
+
+        setNewSession({ ...newSession, description: html })
+    }
 
     const handleAddTeamMember = () => {
         setNewSession({ ...newSession, team_members: [...newSession.team_members, teamMember] })
@@ -191,64 +182,26 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
         }
     }, [])
 
-    useEffect(() => {
-        const selectedLocation = newSession.location.toLocaleLowerCase()
+    const isOverlapping = ({ filteredSeshs }: { filteredSeshs: SessionsDTO[] }) => {
+        const formatDate = moment.utc(newSession.startDate).format("YYYY-MM-DD")
+        const newSessionStart = moment.utc(`${formatDate}T${newSession.startTime}`)
+        const newSessionEnd = newSessionStart.clone().add(newSession.duration, "minutes")
 
-        if (selectedLocation === "other") {
-            return setSlotsUnavailable((prevState) =>
-                prevState.map((slot) => ({
-                    ...slot,
-                    disabled: false
-                }))
-            )
+        for (const idx of filteredSeshs) {
+            const sessionStart = moment.utc(`${idx.startDate}T${idx.startTime}`)
+            const sessionEnd = sessionStart.clone().add(idx.duration, "minutes")
+
+            if (
+                (newSessionStart.isSameOrAfter(sessionStart) && newSessionStart.isBefore(sessionEnd)) ||
+                (newSessionEnd.isAfter(sessionStart) && newSessionEnd.isSameOrBefore(sessionEnd)) ||
+                (newSessionStart.isSameOrBefore(sessionStart) && newSessionEnd.isSameOrAfter(sessionEnd))
+            ) {
+                return true
+            }
         }
 
-        const filteredSession = sessions
-            .filter((item) => item.location.toLocaleLowerCase() === selectedLocation)
-            .filter((item) => {
-                const selectedDate = moment.utc(new Date(newSession.startDate)).format("MMM d, yyyy")
-                const newSessionStartDate = moment.utc(new Date(item.startDate)).format("MMM d, yyyy")
-
-                return selectedDate === newSessionStartDate
-            })
-
-        if (filteredSession.length > 0) {
-            const intervals: string[] = []
-            filteredSession.forEach((item) => {
-                const [hours, minutes] = item.startTime.split(":").map(Number)
-
-                const startTimeFormatted = moment.utc({ hours, minutes })
-
-                const endTime = moment.utc({ hours, minutes }).add(parseInt(item.duration), "minute")
-
-                let current = startTimeFormatted.clone()
-                while (current.isBefore(endTime)) {
-                    intervals.push(current.format("HH:mm"))
-                    current.add(15, "minutes")
-                }
-            })
-
-            const newSlots = slotsUnavailable.map((i) => {
-                if (intervals.includes(i.time)) {
-                    return {
-                        ...i,
-                        disabled: true
-                    }
-                }
-
-                return i
-            })
-
-            setSlotsUnavailable(newSlots)
-        } else {
-            setSlotsUnavailable((prevState) =>
-                prevState.map((slot) => ({
-                    ...slot,
-                    disabled: false
-                }))
-            )
-        }
-    }, [newSession])
+        return false
+    }
 
     const handleNextStep = () => {
         if (
@@ -269,6 +222,48 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                 theme: "light"
             })
         }
+
+        if (newSession.duration === "0") {
+            return toast.error("Please fill duration time field.", {
+                position: "top-center",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light"
+            })
+        }
+
+        const selectedLocation = newSession.location.toLocaleLowerCase()
+
+        let filteredSeshs = sessions
+            .filter((item) => item.location.toLocaleLowerCase() === selectedLocation)
+            .filter((item) => {
+                const formatDate = moment.utc(newSession.startDate).format("YYYY-MM-DD")
+
+                const selectedDate = moment.utc(formatDate)
+                const newSessionStartDate = moment.utc(item.startDate)
+
+                return selectedDate.isSame(newSessionStartDate)
+            })
+
+        filteredSeshs = filteredSeshs.filter((item) => item.id !== sessionId)
+
+        if (isOverlapping({ filteredSeshs })) {
+            return toast.error("Session already booked on that Date and Time.", {
+                position: "top-center",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light"
+            })
+        }
+        setSteps(2)
 
         setSteps(2)
     }
@@ -304,16 +299,17 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                 <label htmlFor="info" className="font-[600]">
                     Description*
                 </label>
-                <textarea
-                    className="border-[#C3D0CF] border-2 p-1 rounded-[8px] h-[150px]"
-                    id="info"
-                    placeholder="What will be covered during the session ?"
-                    value={description}
-                    maxLength={2000}
-                    onChange={(e) => setNewSession({ ...newSession, description: e.target.value })}
-                />
-                <div className="flex w-full justify-end">
-                    <h1 className="text-[14px] text-[#AAAAAA]">Max 2000 characters</h1>
+                <div className="w-full h-[400px] p-4 border border-gray-300 rounded overflow-scroll">
+                    {richTextEditor && (
+                        // @ts-ignore
+                        <Editor
+                            editorState={richTextEditor}
+                            onEditorStateChange={onEditorStateChange}
+                            wrapperClassName="wrapper-class"
+                            editorClassName="editor-class"
+                            toolbarClassName="toolbar-class"
+                        />
+                    )}
                 </div>
             </div>
             {newSession.event_id !== 101 ? (
@@ -324,6 +320,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                     <select
                         id="location"
                         name="location"
+                        value={location}
                         className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
                         onChange={(e) => setNewSession({ ...newSession, location: e.target.value })}
                     >
@@ -340,7 +337,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                 ""
             )}
 
-            {newSession.location === "Other" ? (
+            {location === "Other" ? (
                 <div className="flex flex-col gap-1 w-full mt-2">
                     <label htmlFor="custom_location" className="font-[600]">
                         Specify location
@@ -349,7 +346,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                         type="text"
                         placeholder="Specify Location"
                         className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
-                        value={newSession.custom_location}
+                        value={custom_location}
                         onChange={(e) => setNewSession({ ...newSession, custom_location: e.target.value })}
                     />
                 </div>
@@ -365,50 +362,34 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                 />
             </div>
 
-            <div className="flex flex-col gap-1 w-full mt-2">
-                <label htmlFor="location" className="font-[600]">
-                    Duration*
-                </label>
-                <select
-                    id="location"
-                    name="location"
-                    value={newSession.duration}
-                    className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
-                    onChange={(e) => setNewSession({ ...newSession, duration: e.target.value })}
-                >
-                    <option value="0">Select Duration</option>
-                    {durationsOpt.map((duration, index) => {
-                        const formatted = moment.duration(duration.time, "minutes")
-                        const hours = formatted.hours()
-                        const mins = formatted.minutes()
-                        return (
-                            <option key={index} value={duration.time} disabled={duration.disabled}>{`${`${
-                                hours === 0 ? "" : `${hours}h`
-                            }${mins}m`}`}</option>
-                        )
-                    })}
-                </select>
-            </div>
-
-            {newSession.location !== "Select Location" && newSession.location !== "" && (
-                <div className="flex flex-col justify-start my-2">
-                    <label className="font-[600]">Time Slot*</label>
-                    <select
-                        id="location"
-                        name="location"
-                        value={newSession.startTime}
+            <div className="flex flex-row w-full gap-5 my-2">
+                <div className="flex flex-col w-3/6">
+                    <label htmlFor="startTime" className="font-[600]">
+                        Start Time* (24h format)
+                    </label>
+                    <MaskedInput
+                        id="startTime"
                         className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
+                        mask={[/\d/, /\d/, ":", /\d/, /\d/]}
+                        value={startTime}
                         onChange={(e) => setNewSession({ ...newSession, startTime: e.target.value })}
-                    >
-                        <option value="00">Select Slot</option>
-                        {slotsUnavailable.map((slot, index) => (
-                            <option key={index} value={slot.time} disabled={slot.disabled}>{`${slot.time}:00-${
-                                slot.time > "12" ? "PM" : "AM"
-                            }`}</option>
-                        ))}
-                    </select>
+                        placeholder="18:00"
+                    />
                 </div>
-            )}
+                <div className="flex flex-col w-3/6">
+                    <label htmlFor="duration" className="font-[600]">
+                        Duration* (Minutes)
+                    </label>
+                    <input
+                        type="text"
+                        id="duration"
+                        placeholder="60m"
+                        className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
+                        value={duration}
+                        onChange={(e) => setNewSession({ ...newSession, duration: e.target.value })}
+                    />
+                </div>
+            </div>
 
             <div className="flex flex-col gap-4 w-full my-8">
                 <div className="flex flex-col md:flex-row w-full gap-4">
