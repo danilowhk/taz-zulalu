@@ -7,6 +7,7 @@ import { ToastContainer, toast } from "react-toastify"
 import NextImage from "next/image"
 import { stateToHTML } from "draft-js-export-html"
 import { EditorState } from "draft-js"
+import { stateFromHTML } from "draft-js-import-html"
 import MaskedInput from "react-text-mask"
 import { EditorProps } from "react-draft-wysiwyg"
 import dynamic from "next/dynamic"
@@ -53,7 +54,24 @@ const DynamicEditor = dynamic<EditorProps>(() => import("react-draft-wysiwyg").t
 })
 
 const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
-    const { name, team_members, startDate, tags, startTime, duration, custom_location, event_id, location } = newSession
+    const {
+        name,
+        team_members,
+        startDate,
+        tags,
+        startTime,
+        duration,
+        custom_location,
+        event_id,
+        location,
+        description
+    } = newSession
+
+    const htmlToEditorState = (html: string) => {
+        const contentState = stateFromHTML(html)
+        return EditorState.createWithContent(contentState)
+    }
+
     const [teamMember, setTeamMember] = useState({ name: "", role: "Speaker" })
     const [tag, setTag] = useState("")
     const [rerender, setRerender] = useState(true)
@@ -68,7 +86,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
 
     const wraperRef = useRef(null)
 
-    const [richTextEditor, setRichTextEditor] = useState<EditorState>(EditorState.createEmpty())
+    const [richTextEditor, setRichTextEditor] = useState<EditorState>(htmlToEditorState(description))
 
     const onEditorStateChange = (editorState: EditorState) => {
         setRichTextEditor(editorState)
@@ -129,6 +147,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
         await axios
             .get("/api/fetchEventTypes")
             .then((res) => {
+                console.log(res.data)
                 setEventTypesOpt(res.data)
             })
             .catch((err) => console.log(err))
@@ -320,7 +339,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                 </label>
                 <select
                     id="location"
-                    value={location}
+                    value={newSession.location}
                     name="location"
                     className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
                     onChange={(e) => setNewSession({ ...newSession, location: e.target.value })}
@@ -521,6 +540,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                 <select
                     id="format"
                     name="format"
+                    value={newSession.format}
                     className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px]"
                     onChange={(e) => setNewSession({ ...newSession, format: e.target.value })}
                 >
@@ -537,6 +557,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                 <select
                     id="type"
                     name="type"
+                    value={newSession.event_type}
                     className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px]"
                     onChange={(e) => setNewSession({ ...newSession, event_type: e.target.value })}
                 >
@@ -546,9 +567,6 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                                 {item.type}
                             </option>
                         ))}
-                    <option value="Workshop">Workshop</option>
-                    <option value="Lecture">Lecture</option>
-                    <option value="Other">Other</option>
                 </select>
             </div>
             <div className="flex flex-col gap-1 my-2">
@@ -556,6 +574,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                 <select
                     id="level"
                     name="level"
+                    value={newSession.level}
                     className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px]"
                     onChange={(e) => setNewSession({ ...newSession, level: e.target.value })}
                 >

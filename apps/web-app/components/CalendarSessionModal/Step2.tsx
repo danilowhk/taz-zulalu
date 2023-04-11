@@ -10,6 +10,7 @@ import { EditorState } from "draft-js"
 import { stateToHTML } from "draft-js-export-html"
 import MaskedInput from "react-text-mask"
 import { EditorProps } from "react-draft-wysiwyg"
+import { stateFromHTML } from "draft-js-import-html"
 
 import { TracksDTO, FormatDTO, LevelDTO, LocationDTO, EventTypeDTO, SessionsDTO } from "../../types"
 import SlotsAvailableModal from "../SlotsAvailableModal"
@@ -55,7 +56,7 @@ const loadEditor: Loader<EditorProps> = async () => {
 const Editor = dynamic<EditorProps>(loadEditor, { ssr: false })
 
 const Step2 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
-    const { name, team_members, startDate, tags, startTime, duration, location, event_id } = newSession
+    const { name, team_members, startDate, tags, startTime, duration, location, event_id, description } = newSession
     const wraperRef = useRef(null)
     const [teamMember, setTeamMember] = useState({ name: "", role: "Speaker" })
     const [tag, setTag] = useState("")
@@ -70,7 +71,12 @@ const Step2 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
     const [openSlotsModal, setOpenSlotsModal] = useState(false)
     const [filteredSessionsModal, setFilteredSessionsModal] = useState<SessionsDTO[]>([])
 
-    const [richTextEditor, setRichTextEditor] = useState<EditorState>(EditorState.createEmpty())
+    const htmlToEditorState = (html: string) => {
+        const contentState = stateFromHTML(html)
+        return EditorState.createWithContent(contentState)
+    }
+
+    const [richTextEditor, setRichTextEditor] = useState<EditorState>(htmlToEditorState(description))
 
     const onEditorStateChange = (editorState: EditorState) => {
         setRichTextEditor(editorState)
@@ -327,6 +333,7 @@ const Step2 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                     <select
                         id="location"
                         name="location"
+                        value={newSession.location}
                         className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
                         onChange={(e) => setNewSession({ ...newSession, location: e.target.value })}
                     >
@@ -527,6 +534,7 @@ const Step2 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                 <select
                     id="format"
                     name="format"
+                    value={newSession.format}
                     className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px]"
                     onChange={(e) => setNewSession({ ...newSession, format: e.target.value })}
                 >
@@ -543,6 +551,7 @@ const Step2 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                 <select
                     id="type"
                     name="type"
+                    value={newSession.event_type}
                     className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px]"
                     onChange={(e) => setNewSession({ ...newSession, event_type: e.target.value })}
                 >
@@ -552,9 +561,6 @@ const Step2 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                                 {item.type}
                             </option>
                         ))}
-                    <option value="Workshop">Workshop</option>
-                    <option value="Lecture">Lecture</option>
-                    <option value="Other">Other</option>
                 </select>
             </div>
             <div className="flex flex-col gap-1 my-2">
@@ -562,6 +568,7 @@ const Step2 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                 <select
                     id="level"
                     name="level"
+                    value={newSession.level}
                     className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px]"
                     onChange={(e) => setNewSession({ ...newSession, level: e.target.value })}
                 >
