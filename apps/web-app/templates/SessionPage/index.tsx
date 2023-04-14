@@ -135,9 +135,9 @@ const SessionPage = ({ session, sessions, userId }: Props) => {
                                 </h1>
                             </div>
                         </div>
-                        <div className="flex flex-col lg:flex-row gap-[24px] w-full mt-4">
+                        <div className="flex flex-col gap-[24px] w-full mt-4">
                             <div className="w-full md:w-5/6 py-5">{reactContent}</div>
-                            <div className="flex flex-wrap gap-5 w-full lg:w-3/6 p-0 lg:p-5">
+                            <div className="flex flex-wrap gap-5 w-full lg:w-3/6 p-0">
                                 {session.team_members.map((item: any, index: any) => (
                                     <div
                                         key={index}
