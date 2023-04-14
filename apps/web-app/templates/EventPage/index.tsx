@@ -182,7 +182,7 @@ const EventPage = ({ event, sessions, allSessions }: Props) => {
                     </div>
                     <div className="flex flex-col w-auto md:flex-row gap-4 md:gap-[8px] justify-end items-start md:items-center">
 
-                        {event.apply_form !== "https://zuzalu.city/.app/events" && (
+                        {event.apply_form !== "https://zuzalu.city/app/events" && (
                             <a
                             className="w-full md:w-auto"
                             href={
