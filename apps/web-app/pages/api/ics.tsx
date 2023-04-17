@@ -38,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (response.error === null) {
             const cal = ical({
                 prodId: '//superman-industries.com//ical-generator//EN',
-                sessions: response.data.map((session: any) => {
+                events: response.data.map((session: any) => {
                     const sessionStartDate = new Date(`${session.startDate}T${session.startTime}`);
                     const sessionEndDate = new Date(sessionStartDate.getTime() + session.duration * 60000); // add session duration in minutes
                     const description = `Location: ${session.location}\n\nTags: ${JSON.stringify(session.tags)}\n\nTrack: ${session.track}\n\nFormat: ${session.format}\n\nLevel: ${session.level}\n\n${session.description}\n\n\n\nMore Info: https://zuzalu.city/event/${session.event_id}/session/${session.id}`;
@@ -48,9 +48,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         start: sessionStartDate,
                         end: sessionEndDate,
                         summary: `[${session.session_slug}] ${session.name} (${session.session_type})`,
-                        description: description,
+                        description,
                         location: session.location,
-                        url: url
+                        url
                     }
                 })
             })
