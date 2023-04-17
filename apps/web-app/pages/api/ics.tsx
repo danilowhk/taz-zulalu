@@ -48,9 +48,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         start: sessionStartDate,
                         end: sessionEndDate,
                         summary: `[${session.session_slug}] ${session.name} (${session.session_type})`,
-                        description,
+                        description: description,
                         location: session.location,
-                        url
+                        url: url
                     }
                 })
             })
