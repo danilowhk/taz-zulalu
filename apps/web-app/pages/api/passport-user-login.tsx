@@ -77,7 +77,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         .single()
 
                     if (publicUserError) {
-                        res.status(400).json("Error fetching public user")
+                        console.log(`Error fetching public user: ${JSON.stringify(publicUserError)}`)
+                        // res.status(400).json(`Error fetching public user: ${JSON.stringify(publicUserError)}`)
                     }
 
                     // If user profile exists, do an update of the uui_auth field

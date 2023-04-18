@@ -1,6 +1,11 @@
 import { useRouter } from "next/router"
 import { createContext, ReactNode, useState, useContext, useEffect } from "react"
-import { requestSignedZuzaluUUIDUrl, useFetchParticipant, useSemaphoreSignatureProof } from "@pcd/passport-interface"
+import {
+    openSignedZuzaluUUIDPopup,
+    useFetchParticipant,
+    usePassportPopupMessages,
+    useSemaphoreSignatureProof
+} from "@pcd/passport-interface"
 import axios from "axios"
 
 type UserPassportContextData = {
@@ -36,13 +41,15 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
         window.open(popupUrl, "_blank", "width=360,height=480,top=100,popup")
     }
 
+    const [pcdStr2, _passportPendingPCDStr] = usePassportPopupMessages()
+
     function requestSignedZuID() {
         setLoadingPassport({ step: 1, text: "Waiting to prove passport..." })
-        const proofUrl = requestSignedZuzaluUUIDUrl(PASSPORT_URL, `${window.location.origin}/popup`)
-        requestProofFromPassport(proofUrl)
+        const proofUrl = openSignedZuzaluUUIDPopup(PASSPORT_URL, `${window.location.origin}/popup`, "consumer-client")
+        // requestProofFromPassport(proofUrl)
     }
 
-    // Listen for PCDs coming back from the Passport popup
+    // // Listen for PCDs coming back from the Passport popup
     useEffect(() => {
         async function receiveMessage(ev: MessageEvent<any>) {
             if (!ev.data.encodedPcd) return
@@ -53,7 +60,12 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
     }, [])
 
     // Request a Zuzalu UUID-revealing proof from Passport
-    const { signatureProof, signatureProofValid } = useSemaphoreSignatureProof(pcdStr)
+    const [signatureProofValid, setSignatureProofValid] = useState<boolean | undefined>()
+    const onProofVerified = (valid: boolean) => {
+        setSignatureProofValid(valid)
+    }
+
+    const { signatureProof } = useSemaphoreSignatureProof(pcdStr, onProofVerified)
 
     // Extract UUID, the signed message of the returned PCD
     useEffect(() => {
@@ -67,6 +79,7 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
     const { participant } = useFetchParticipant(PASSPORT_SERVER_URL, uuid)
 
     const loginProof = async (participant1: any) => {
+        console.log("participant1", participant1)
         try {
             await axios({
                 method: "post",
