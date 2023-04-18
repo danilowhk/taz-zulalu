@@ -1,11 +1,12 @@
 import { useRouter } from "next/router"
 import { createContext, ReactNode, useState, useContext, useEffect } from "react"
 import {
-  openSignedZuzaluUUIDPopup,
-  useFetchParticipant,
-  usePassportPopupMessages,
-  useSemaphoreSignatureProof,
-} from "@pcd/passport-interface";import axios from "axios"
+    openSignedZuzaluUUIDPopup,
+    useFetchParticipant,
+    usePassportPopupMessages,
+    useSemaphoreSignatureProof
+} from "@pcd/passport-interface"
+import axios from "axios"
 
 type UserPassportContextData = {
     requestSignedZuID: () => void
@@ -40,12 +41,11 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
         window.open(popupUrl, "_blank", "width=360,height=480,top=100,popup")
     }
 
-    const [pcdStr2, _passportPendingPCDStr] = usePassportPopupMessages();
-
+    const [pcdStr2, _passportPendingPCDStr] = usePassportPopupMessages()
 
     function requestSignedZuID() {
         setLoadingPassport({ step: 1, text: "Waiting to prove passport..." })
-        const proofUrl = openSignedZuzaluUUIDPopup(PASSPORT_URL, `${window.location.origin}/popup`,  "consumer-client")
+        const proofUrl = openSignedZuzaluUUIDPopup(PASSPORT_URL, `${window.location.origin}/popup`, "consumer-client")
         // requestProofFromPassport(proofUrl)
     }
 
@@ -59,33 +59,31 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
         window.addEventListener("message", receiveMessage, false)
     }, [])
 
-
-
     // Request a Zuzalu UUID-revealing proof from Passport
-    const [signatureProofValid, setSignatureProofValid] = useState<boolean | undefined>();
+    const [signatureProofValid, setSignatureProofValid] = useState<boolean | undefined>()
     const onProofVerified = (valid: boolean) => {
-        setSignatureProofValid(valid);
-      };
+        setSignatureProofValid(valid)
+    }
 
-    const { signatureProof } =
-    useSemaphoreSignatureProof(pcdStr, onProofVerified);
+    const { signatureProof } = useSemaphoreSignatureProof(pcdStr, onProofVerified)
 
     // Extract UUID, the signed message of the returned PCD
     useEffect(() => {
         if (signatureProofValid && signatureProof) {
-          const userUuid = signatureProof.claim.signedMessage;
-          setUuid(userUuid);
+            const userUuid = signatureProof.claim.signedMessage
+            setUuid(userUuid)
         }
-      }, [signatureProofValid, signatureProof]);
-    
-  // Finally, once we have the UUID, fetch the participant data from Passport.
-  const { participant } = useFetchParticipant(PASSPORT_SERVER_URL, uuid);
+    }, [signatureProofValid, signatureProof])
+
+    // Finally, once we have the UUID, fetch the participant data from Passport.
+    const { participant } = useFetchParticipant(PASSPORT_SERVER_URL, uuid)
 
     const loginProof = async (participant1: any) => {
+        console.log("participant1", participant1)
         try {
             await axios({
                 method: "post",
-                url: "http://localhost:3000'/api/passport-user-login/",
+                url: "https://zuzalu.city/api/passport-user-login/",
                 data: participant1,
                 headers: {
                     "Content-Type": "application/json"
