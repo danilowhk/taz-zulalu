@@ -11,8 +11,9 @@ import { stateToHTML } from "draft-js-export-html"
 import MaskedInput from "react-text-mask"
 import { EditorProps } from "react-draft-wysiwyg"
 import { stateFromHTML } from "draft-js-import-html"
+import TimeDropdown from "../TimeDropdown"
 
-import { TracksDTO, FormatDTO, LevelDTO, LocationDTO, EventTypeDTO, SessionsDTO } from "../../types"
+import { TracksDTO, FormatDTO, LevelDTO, LocationDTO, EventTypeDTO, EventsDTO, SessionsDTO } from "../../types"
 import SlotsAvailableModal from "../SlotsAvailableModal"
 
 type NewSessionState = {
@@ -32,6 +33,7 @@ type NewSessionState = {
     name: string
     startDate: Date
     startTime: string
+    endTime: string
     tags: string[]
     team_members: {
         name: string
@@ -45,6 +47,7 @@ type Props = {
     setNewSession: (newEvent: NewSessionState) => void
     setSteps: (steps: number) => void
     sessions: SessionsDTO[]
+    events: EventsDTO[]
 }
 
 // @ts-ignore
@@ -55,7 +58,7 @@ const loadEditor: Loader<EditorProps> = async () => {
 
 const Editor = dynamic<EditorProps>(loadEditor, { ssr: false })
 
-const Step2 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
+const Step2 = ({ events, newSession, setNewSession, setSteps, sessions }: Props) => {
     const { name, team_members, startDate, tags, startTime, duration, location, event_id, description } = newSession
     const wraperRef = useRef(null)
     const [teamMember, setTeamMember] = useState({ name: "", role: "Speaker" })
@@ -83,6 +86,27 @@ const Step2 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
         const html = stateToHTML(editorState.getCurrentContent())
 
         setNewSession({ ...newSession, description: html })
+    }
+
+    const handleSelectEventTrack = (index: number) => {
+        const selectedEvent = events[index]
+        if (selectedEvent.id === 101) {
+            setNewSession({
+                ...newSession,
+                location: "Other",
+                event_id: selectedEvent.id,
+                event_slug: selectedEvent.slug,
+                event_item_id: selectedEvent.item_id
+            })
+        } else {
+            setNewSession({
+                ...newSession,
+                location: "",
+                event_id: selectedEvent.id,
+                event_slug: selectedEvent.slug,
+                event_item_id: selectedEvent.item_id
+            })
+        }
     }
 
     const handleAddTeamMember = () => {
@@ -295,9 +319,9 @@ const Step2 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                 pauseOnHover
                 theme="light"
             />
-            <div className="flex flex-col gap-1 my-1 w-full">
+            <div className="flex flex-col gap-1 my-2 w-full">
                 <label htmlFor="name" className="font-[600]">
-                    Title*
+                    Session Title*
                 </label>
                 <input
                     className="border-[#C3D0CF] border-2 p-1 rounded-[8px] h-[42px]"
@@ -308,25 +332,27 @@ const Step2 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                     onChange={(e) => setNewSession({ ...newSession, name: e.target.value })}
                 />
             </div>
+
             <div className="flex flex-col gap-1 my-2 w-full">
-                <label htmlFor="info" className="font-[600]">
-                    Description*
+                <label htmlFor="name" className="font-[600]">
+                    Event Track*
                 </label>
-                <div className="w-full h-[400px] p-4 border border-gray-300 rounded overflow-scroll">
-                    {richTextEditor && (
-                        // @ts-ignore
-                        <Editor
-                            editorState={richTextEditor}
-                            onEditorStateChange={onEditorStateChange}
-                            wrapperClassName="wrapper-class"
-                            editorClassName="editor-class"
-                            toolbarClassName="toolbar-class"
-                        />
-                    )}
-                </div>
+                <select
+                    id="eventTrack"
+                    name="eventTrack"
+                    className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
+                    onChange={(e) => handleSelectEventTrack(parseInt(e.target.value))}
+                >
+                    {events.map((item, index) => (
+                        <option key={item.id} value={index}>
+                            {item.name}
+                        </option>
+                    ))}
+                </select>
             </div>
+
             {event_id !== 101 && (
-                <div className="flex flex-col gap-1 w-full">
+                <div className="flex flex-col gap-1 w-full my-2">
                     <label htmlFor="location" className="font-[600]">
                         Location*
                     </label>
@@ -348,6 +374,38 @@ const Step2 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                 </div>
             )}
 
+            <div className="flex flex-row w-full gap-5 my-2">
+                <div className="flex flex-col w-2/6">
+                    <label className="font-[600]">Date*</label>
+                    <DatePicker
+                        className="border-[#C3D0CF] border-2 p-1 rounded-[8px] h-[42px] w-full"
+                        selected={startDate}
+                        onChange={(e) => setNewSession({ ...newSession, startDate: e as Date })}
+                        minDate={moment().toDate()}
+                    />
+                </div>
+                <div className="flex flex-col w-2/6">
+                    <label htmlFor="startTime" className="font-[600]">
+                        Start Time*
+                    </label>
+                    <TimeDropdown
+                        id="startTime"
+                        value={newSession.startTime}
+                        onChange={(e: any) => setNewSession({ ...newSession, startTime: e.target.value })}
+                    />
+                </div>
+                <div className="flex flex-col w-2/6">
+                    <label htmlFor="startTime" className="font-[600]">
+                        End Time*
+                    </label>
+                    <TimeDropdown
+                        id="endTime"
+                        value={newSession.endTime}
+                        onChange={(e: any) => setNewSession({ ...newSession, endTime: e.target.value })}
+                    />
+                </div>
+            </div>
+
             {location === "Other" ? (
                 <div className="flex flex-col gap-1 w-full mt-2">
                     <label htmlFor="custom_location" className="font-[600]">
@@ -364,14 +422,23 @@ const Step2 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
             ) : (
                 ""
             )}
-            <div className="flex flex-col justify-start my-2">
-                <label className="font-[600]">Start Date*</label>
-                <DatePicker
-                    className="border-[#C3D0CF] border-2 p-1 rounded-[8px] h-[42px] w-full"
-                    selected={startDate}
-                    onChange={(e) => setNewSession({ ...newSession, startDate: e as Date })}
-                    minDate={moment().toDate()}
-                />
+
+            <div className="flex flex-col gap-1 my-2 w-full">
+                <label htmlFor="info" className="font-[600]">
+                    Description*
+                </label>
+                <div className="w-full h-[400px] p-4 border border-gray-300 rounded overflow-scroll">
+                    {richTextEditor && (
+                        // @ts-ignore
+                        <Editor
+                            editorState={richTextEditor}
+                            onEditorStateChange={onEditorStateChange}
+                            wrapperClassName="wrapper-class"
+                            editorClassName="editor-class"
+                            toolbarClassName="toolbar-class"
+                        />
+                    )}
+                </div>
             </div>
 
             {startDate && location && location !== "Other" && event_id !== 101 && (
@@ -387,35 +454,6 @@ const Step2 = ({ newSession, setNewSession, setSteps, sessions }: Props) => {
                     </button>
                 </div>
             )}
-
-            <div className="flex flex-row w-full gap-5 my-2">
-                <div className="flex flex-col w-3/6">
-                    <label htmlFor="startTime" className="font-[600]">
-                        Start Time* (24h format)
-                    </label>
-                    <MaskedInput
-                        id="startTime"
-                        className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
-                        mask={[/\d/, /\d/, ":", /\d/, /\d/]}
-                        value={startTime}
-                        onChange={(e) => setNewSession({ ...newSession, startTime: e.target.value })}
-                        placeholder="18:00"
-                    />
-                </div>
-                <div className="flex flex-col w-3/6">
-                    <label htmlFor="duration" className="font-[600]">
-                        Duration* (Minutes)
-                    </label>
-                    <input
-                        type="text"
-                        id="duration"
-                        placeholder="60m"
-                        className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
-                        value={duration}
-                        onChange={(e) => setNewSession({ ...newSession, duration: e.target.value })}
-                    />
-                </div>
-            </div>
 
             <div className="flex flex-col gap-4 w-full my-8">
                 <div className="flex flex-col md:flex-row w-full gap-4">

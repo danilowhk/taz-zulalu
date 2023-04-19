@@ -47,7 +47,7 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions }: Props) =
     const router = useRouter()
     const questionTextRef = useRef(null)
     const [isLoading, setIsLoading] = useState(false)
-    const [steps, setSteps] = useState(1)
+    const [steps, setSteps] = useState(2)
     const [newSession, setNewSession] = useState<NewSessionState>({
         description: "",
         name: "",
@@ -192,14 +192,14 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions }: Props) =
                                             {steps === 1
                                                 ? "Select Subevent"
                                                 : steps === 2
-                                                ? "Session info (for the public)"
+                                                ? "Session Info"
                                                 : steps === 3
                                                 ? "Session Logistics (for organizers)"
                                                 : "Review Session"}
                                         </h1>
                                         <div
                                             onClick={() => closeModal(false)}
-                                            className="cursor-pointer flex p-4 items-center border-2 border-black justify-center w-[25px] h-[25px] rounded-full"
+                                            className="cursor-pointer flex p-4 items-center border-2 border-black justify-center w-[18px] h-[18px] rounded-full"
                                         >
                                             X
                                         </div>
@@ -216,6 +216,7 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions }: Props) =
 
                                     {steps === 2 && (
                                         <Step2
+                                            events={events}
                                             setSteps={setSteps}
                                             newSession={newSession}
                                             setNewSession={setNewSession}
