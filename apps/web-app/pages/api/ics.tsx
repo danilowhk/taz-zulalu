@@ -37,17 +37,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .order("startTime", { ascending: true })
         if (response.error === null) {
             const cal = ical({
-                prodId: '//superman-industries.com//ical-generator//EN',
+                prodId: '//zuzalu.city//sessions//EN',
                 events: response.data.map((session: any) => {
                     const sessionStartDate = new Date(`${session.startDate}T${session.startTime}`);
-                    const sessionEndDate = new Date(sessionStartDate.getTime() + session.duration * 60000); // add session duration in minutes
+                    let duration = parseFloat(session.duration);
+                    if (isNaN(duration)) {
+                        duration = parseFloat(session.duration.replace(/[^0-9]/g, ''));
+                    }
+                    const sessionEndDate = new Date(sessionStartDate.getTime() + duration * 60000); // add session duration in minutes
                     const description = `Location: ${session.location}\n\nTags: ${JSON.stringify(session.tags)}\n\nTrack: ${session.track}\n\nFormat: ${session.format}\n\nLevel: ${session.level}\n\n${session.description}\n\n\n\nMore Info: https://zuzalu.city/event/${session.event_id}/session/${session.id}`;
-                        const url = `https://zuzalu.city/event/${session.event_id}/session/${session.id}`
+                    const url = `https://zuzalu.city/event/${session.event_id}/session/${session.id}`
 
-                        return {
+                    return {
                         start: sessionStartDate,
                         end: sessionEndDate,
-                        summary: `[${session.session_slug}] ${session.name} (${session.session_type})`,
+                        summary: `[${session.event_slug}] ${session.name} (${session.event_type})`,
                         description,
                         location: session.location,
                         url
