@@ -37,7 +37,6 @@ const SessionPage = ({ session, sessions, userId }: Props) => {
                     subEventId: session.subevent_id
                 })
             } catch (error) {
-                console.log(error)
                 await axios.post("/api/pretix-deactivate-subevent", {
                     slug: session.event_slug,
                     subEventId: session.subevent_id
@@ -77,15 +76,13 @@ const SessionPage = ({ session, sessions, userId }: Props) => {
                         <FavoriteButton session={session} isMiniButton={false} />
                         <ParticipateButton session={session} isTallButton={true} />
 
-                        {checkOrganizerOrCreator && (
-                            <button
-                                className={`flex w-full md:w-auto justify-center gap-2 items-center bg-zulalu-primary border border-primary text-white font-[600] py-[8px] px-[16px] rounded-[8px]`}
-                                onClick={() => setOpenEditSessionModal(true)}
-                            >
-                                <NextImage src={"/pencil.svg"} width={12} height={16} />
-                                EDIT SESSION
-                            </button>
-                        )}
+                        <button
+                            className={`flex w-full md:w-auto justify-center gap-2 items-center bg-zulalu-primary border border-primary text-white font-[600] py-[8px] px-[16px] rounded-[8px]`}
+                            onClick={() => setOpenEditSessionModal(true)}
+                        >
+                            <NextImage src={"/pencil.svg"} width={12} height={16} />
+                            EDIT SESSION
+                        </button>
                         <EditSessionModal
                             isOpen={openEditSessionModal}
                             closeModal={setOpenEditSessionModal}
