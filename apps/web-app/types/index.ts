@@ -65,6 +65,8 @@ export interface SessionsDTO {
     events: EventsDTO
     quota_id: number
     creator_id: number
+    capacity: number
+    totalParticipants: number
 }
 
 export interface RsvpDTO {
