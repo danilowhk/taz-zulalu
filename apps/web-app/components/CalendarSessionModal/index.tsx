@@ -185,7 +185,7 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions }: Props) =
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <Dialog.Panel className="flex flex-col h-full w-5/6 overflow-y-scroll max-w-full transform rounded-lg bg-white text-left align-middle  transition-all">
+                            <Dialog.Panel className="flex flex-col h-full w-5/6 overflow-y-scroll max-w-[650px] transform rounded-lg bg-white text-left align-middle  transition-all">
                                 <div className="w-full h-full py-5 px-10">
                                     <div className="flex w-full justify-between items-center">
                                         <h1 className="text-[24px] font-[600]">
