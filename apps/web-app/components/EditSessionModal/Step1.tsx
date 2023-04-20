@@ -387,7 +387,10 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
                 <DatePicker
                     className="border-[#C3D0CF] border-2 p-1 rounded-[8px] h-[42px] w-full"
                     selected={moment(newSession.startDate, "YYYY-MM-DDTHH:mm:ss").toDate()}
-                    onChange={(e) => setNewSession({ ...newSession, startDate: e as Date })}
+                    onChange={(e: any) => {
+                        const localDate = new Date(e.getFullYear(), e.getMonth(), e.getDate())
+                        setNewSession({ ...newSession, startDate: localDate })
+                    }}
                 />
             </div>
 

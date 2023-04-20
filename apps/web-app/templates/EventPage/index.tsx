@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react"
 
 import NextImage from "next/image"
 import Link from "next/link"
-
+import { toSvg } from "jdenticon"
 import moment from "moment"
 import AddSessionModal from "../../components/AddSessionModal"
 import Sessions from "../../components/Sessions"
@@ -11,7 +11,6 @@ import { EventsDTO, SessionsDTO } from "../../types"
 import BaseTemplate from "../Base"
 import { useUserAuthenticationContext } from "../../context/UserAuthenticationContext"
 import StyledDatePicker from "../../components/StyledDatePicker"
-import { toSvg } from "jdenticon"
 
 type Props = {
     event: EventsDTO
@@ -20,7 +19,7 @@ type Props = {
 }
 
 const EventPage = ({ event, sessions, allSessions }: Props) => {
-    const { userInfo, userRole } = useUserAuthenticationContext()
+    const { userInfo } = useUserAuthenticationContext()
     const [openAddSessionModal, setOpenAddSessionModal] = useState(false)
     const [speakers, setSpeakers] = useState<string[]>([])
 
@@ -215,7 +214,7 @@ const EventPage = ({ event, sessions, allSessions }: Props) => {
                     </div>
                 </div>
                 <div className="flex flex-col lg:flex-row w-full justify-start bg-white rounded-[16px] h-full">
-                    <div className="hidden md:flex h-full max-w-[1014px] w-full rounded-l-[16px] overflow-hidden">
+                    <div className="hidden md:flex h-full max-w-[800px] w-full rounded-lt-[16px] overflow-hidden">
                         <NextImage
                             src={event.image_url}
                             objectFit="cover"

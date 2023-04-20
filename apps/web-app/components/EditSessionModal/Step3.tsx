@@ -50,7 +50,7 @@ const Step3 = ({ setSteps, newSession, handleSubmit, isLoading }: Props) => {
 
                 <div className="flex items-center gap-2">
                     <NextImage src="/vector-calendar.svg" width={20} height={20} />
-                    <h1>{moment.utc(newSession.startDate).format("dddd, MMMM DD")}</h1>
+                    <h1>{moment(newSession.startDate).format("dddd, MMMM DD")}</h1>
                 </div>
 
                 <div className="flex items-center gap-2">
