@@ -39,7 +39,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const cal = ical({
                 prodId: '//zuzalu.city//sessions//EN',
                 events: response.data.map((session: any) => {
-                    const sessionStartDate = new Date(`${session.startDate}T${session.startTime}`);
+                    let sessionStartDate = new Date(`${session.startDate}T${session.startTime}`);
+                    sessionStartDate = new Date(sessionStartDate.toLocaleString('en-US', {timeZone: 'Europe/Podgorica'}));
                     let duration = parseFloat(session.duration);
                     if (isNaN(duration)) {
                         duration = parseFloat(session.duration.replace(/[^0-9]/g, ''));
