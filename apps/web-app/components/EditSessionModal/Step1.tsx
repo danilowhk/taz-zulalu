@@ -579,9 +579,6 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
                                 {item.type}
                             </option>
                         ))}
-                    <option value="Workshop">Workshop</option>
-                    <option value="Lecture">Lecture</option>
-                    <option value="Other">Other</option>
                 </select>
             </div>
             <div className="flex flex-col gap-1 my-2">
