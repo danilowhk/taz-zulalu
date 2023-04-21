@@ -6,7 +6,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Create authenticated Supabase Client
     const supabase = createServerSupabaseClient({ req, res })
 
-    //Check if we have a session
+    // Check if we have a session
     const {
         data: { session }
     } = await supabase.auth.getSession()
@@ -31,6 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 startTime,
                 endTime,
                 organizers,
+                maxRsvp,
                 tags,
                 info,
                 event_id,
@@ -49,35 +50,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 custom_location
             } = req.body
 
-            await supabase.from("sessions").insert({
-                name,
-                description,
-                startDate,
-                endDate,
-                location,
-                startTime,
-                endTime,
-                organizers,
-                tags,
-                info,
-                event_id,
-                hasTicket,
-                event_type,
-                level,
-                format,
-                team_members,
-                track,
-                equipment,
-                subevent_id: subEventId,
-                event_slug,
-                event_item_id,
-                quota_id,
-                creator_id: user.data!.id,
-                duration,
-                custom_location
-            })
+            await supabase
+                .from("sessions")
+                .insert({
+                    name,
+                    description,
+                    startDate,
+                    endDate,
+                    location,
+                    startTime,
+                    end_time: endTime,
+                    organizers,
+                    capacity: maxRsvp,
+                    tags,
+                    info,
+                    event_id,
+                    hasTicket,
+                    event_type,
+                    level,
+                    format,
+                    team_members,
+                    track,
+                    equipment,
+                    subevent_id: subEventId,
+                    event_slug,
+                    event_item_id,
+                    quota_id,
+                    creator_id: user.data!.id,
+                    duration,
+                    custom_location
+                })
+                .then((response) => {
+                    if (response.error) {
+                        res.status(422).json({ statusCode: 500, message: response.error.message })
+                    }
+                    res.status(201).json("Session created")
+                })
 
-            res.status(201).json("Sesson created")
+            res.status(201).json("Session created")
         } catch (error) {
             console.log("error: ", error)
             res.status(500).json({ statusCode: 500, message: error })

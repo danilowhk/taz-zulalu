@@ -1,14 +1,16 @@
-import { useState } from "react"
-
+import moment from "moment"
+import NextImage from "next/image"
 import { IoMdArrowBack } from "react-icons/io"
+import { Parser } from "html-to-react"
+
+import Loading from "../Loading"
 
 type NewSessionState = {
     description: string
     equipment: string
     event_id: number
-    event_item_id: number
-    event_slug: string
     event_type: string
+    maxRsvp: string
     format: string
     hasTicket: boolean
     info: string
@@ -16,83 +18,62 @@ type NewSessionState = {
     location: string
     custom_location: string
     name: string
-    startDate: Date
-    duration: string
+    startDate: string
+    endTime: string
     startTime: string
-    subevent_id: number
     tags: string[]
     team_members: {
         name: string
         role: string
     }[]
     track: string
-    quota_id: number
+    event_slug: string
+    event_item_id: number
 }
 
 type Props = {
     setSteps: (step: number) => void
-    amountTickets: string
-    setAmountTickets: Function
     newSession: NewSessionState
-    setNewSession: (newEvent: NewSessionState) => void
+    handleSubmit: () => void
+    isLoading: boolean
 }
 
-const Step2 = ({ setSteps, amountTickets, setAmountTickets, newSession, setNewSession }: Props) => {
-    const handleSubmit = async () => {
-        setSteps(3)
-    }
-    return (
-        <div className="flex flex-col w-full gap-5">
-            {newSession.hasTicket ? (
-                <div className="flex flex-col gap-1 my-1 w-full">
-                    <label htmlFor="amount" className="font-[600]">
-                        How many tickets?
-                    </label>
-                    <input
-                        className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px]"
-                        id="amount"
-                        type="number"
-                        min="0"
-                        max="1000"
-                        value={amountTickets}
-                        onChange={(e) => setAmountTickets(e.target.value)}
-                    />
-                </div>
-            ) : (
-                ""
-            )}
-            <div className="flex flex-col my-2">
-                <label htmlFor="equipment" className="font-[600]">
-                    Do you need equipment?
-                </label>
-                <input
-                    className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px]"
-                    id="equipment"
-                    type="text"
-                    value={newSession.equipment}
-                    onChange={(e) => setNewSession({ ...newSession, equipment: e.target.value })}
-                />
-            </div>
+const Step2 = ({ setSteps, newSession, handleSubmit, isLoading }: Props) => {
+    const parser = new Parser()
+    const reactContent = parser.parse(newSession.description)
 
-            <div className="flex flex-col my-2">
-                <label htmlFor="info" className="font-[600]">
-                    Is there anything else we need to know?
-                </label>
-                <textarea
-                    className="border-[#C3D0CF] border-2 p-1 rounded-[8px] h-[150px]"
-                    placeholder="Your answers will be shared with Zulalu Organizers"
-                    name="info"
-                    id="info"
-                    rows={5}
-                    maxLength={2000}
-                    value={newSession.info}
-                    onChange={(e) => setNewSession({ ...newSession, info: e.target.value })}
-                />
-                <div className="flex w-full justify-end">
-                    <h1 className="text-[14px] text-[#AAAAAA]">Max 2000 characters</h1>
+    return (
+        <div className="flex flex-col w-full gap-8 bg-white rounded-lg mt-5">
+            <div className="flex flex-col gap-4">
+                <div className="flex flex-col">
+                    <h1 className="text-[16px] font-[600]">{newSession.track}</h1>
+                    <h1 className="text-[22px] font-[600]">{newSession.name}</h1>
+                </div>
+                <div className="flex items-center gap-2">
+                    <NextImage src="/vector-calendar.svg" width={20} height={20} />
+                    <h1>{moment.utc(newSession.startDate).format("dddd, MMMM DD")}</h1>
+                </div>
+                <div className="flex items-center gap-2">
+                    <NextImage src="/vector-location.svg" width={20} height={20} />
+                    <h1 className="text-[18px]">
+                        {newSession.location === "Other" ? newSession.custom_location : newSession.location}
+                    </h1>
+                </div>
+                <div className="flex items-center gap-2">
+                    <NextImage src="/vector-clock.svg" width={20} height={20} />
+                    <h1>
+                        {newSession.startTime}-{newSession.endTime}
+                    </h1>
+                </div>
+                <div className="flex items-center gap-2">
+                    <NextImage src="/vector-clock.svg" width={20} height={20} />
+                    <h1>{newSession.maxRsvp} RSVPs Allowed</h1>
+                </div>
+                <div className="flex items-center gap-2 mt-10">
+                    <h1 className="text-[18px]">{reactContent}</h1>
                 </div>
             </div>
-            <div className="w-full flex flex-col md:flex-row gap-5 justify-center items-center mt-5">
+            <div className="w-full flex flex-col md:flex-row gap-5 justify-center items-center mb-10">
                 <button
                     type="button"
                     className="w-full flex flex-row border-zulalu-primary border font-[600] justify-center items-center py-[8px] px-[16px] gap-[8px] bg-white rounded-[8px] text-black text-[16px]"
@@ -103,10 +84,11 @@ const Step2 = ({ setSteps, amountTickets, setAmountTickets, newSession, setNewSe
                 </button>
                 <button
                     type="button"
+                    disabled={isLoading}
                     className="w-full flex flex-row font-[600] justify-center items-center py-[8px] px-[16px] gap-[8px] bg-[#35655F] rounded-[8px] text-white text-[16px]"
-                    onClick={handleSubmit}
+                    onClick={() => handleSubmit()}
                 >
-                    NEXT
+                    {isLoading ? <Loading size="xs" /> : "SAVE"}
                 </button>
             </div>
         </div>
