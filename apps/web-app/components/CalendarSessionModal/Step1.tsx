@@ -299,7 +299,7 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
                 <select
                     id="track"
                     name="track"
-                    disabled={checkIfAnyOtherSuggestion}
+                    disabled={checkIfSessionByEventPage}
                     className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px]"
                     onChange={(e) => handleSelectEventTrack(e.target.value)}
                     value={track}
