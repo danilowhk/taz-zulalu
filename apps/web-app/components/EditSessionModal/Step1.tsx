@@ -1,28 +1,28 @@
-/* eslint-disable prefer-const */
-
 import { ComponentType, useEffect, useRef, useState } from "react"
 import dynamic, { Loader } from "next/dynamic"
 import DatePicker from "react-datepicker"
+import NextImage from "next/image"
 import axios from "axios"
 import moment from "moment"
-import { ToastContainer, toast } from "react-toastify"
-import NextImage from "next/image"
+import { toast } from "react-toastify"
+import { IoMdArrowBack } from "react-icons/io"
 import { EditorState } from "draft-js"
 import { stateToHTML } from "draft-js-export-html"
-import { stateFromHTML } from "draft-js-import-html"
-import MaskedInput from "react-text-mask"
 import { EditorProps } from "react-draft-wysiwyg"
+import { stateFromHTML } from "draft-js-import-html"
 
-import { TracksDTO, FormatDTO, LevelDTO, LocationDTO, EventTypeDTO, SessionsDTO } from "../../types"
-import SlotsAvailableModal from "../SlotsAvailableModal"
+import UserIcon from "../../public/userIcon.svg"
+
+import TimeDropdown from "../TimeDropdown"
+
+import { TracksDTO, FormatDTO, LevelDTO, LocationDTO, EventTypeDTO, EventsDTO, SessionsDTO, UserDTO } from "../../types"
 
 type NewSessionState = {
     description: string
     equipment: string
     event_id: number
-    event_item_id: number
-    event_slug: string
     event_type: string
+    maxRsvp: string
     format: string
     hasTicket: boolean
     info: string
@@ -30,17 +30,17 @@ type NewSessionState = {
     location: string
     custom_location: string
     name: string
-    startDate: Date
-    duration: string
+    startDate: string
+    endTime: string
     startTime: string
-    subevent_id: number
     tags: string[]
     team_members: {
         name: string
         role: string
     }[]
     track: string
-    quota_id: number
+    event_slug: string
+    event_item_id: number
 }
 
 type Props = {
@@ -49,6 +49,7 @@ type Props = {
     setSteps: (steps: number) => void
     sessions: SessionsDTO[]
     sessionId: number
+    events: EventsDTO[]
 }
 
 // @ts-ignore
@@ -59,39 +60,29 @@ const loadEditor: Loader<EditorProps> = async () => {
 
 const Editor = dynamic<EditorProps>(loadEditor, { ssr: false })
 
-const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Props) => {
-    const {
-        name,
-        team_members,
-        event_type,
-        level,
-        format,
-        event_id,
-        startDate,
-        tags,
-        track,
-        location,
-        custom_location,
-        startTime,
-        duration
-    } = newSession
-    const [teamMember, setTeamMember] = useState({ name: "", role: "Speaker" })
+const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionId }: Props) => {
+    const { name, team_members, startDate, tags, startTime, endTime, location, event_id, description, maxRsvp, track } =
+        newSession
+    const wraperRef = useRef(null)
     const [tag, setTag] = useState("")
     const [rerender, setRerender] = useState(true)
+
+    const [teamMemberInput, setTeamMemberInput] = useState("")
+    const [suggestions, setSuggestions] = useState<UserDTO[]>([])
+
     const [display, setDisplay] = useState(false)
-    const [tracksOpt, setTracksOpt] = useState<TracksDTO[]>()
+    const [tracksOpt, setTracksOpt] = useState<TracksDTO[]>([])
     const [formatsOpt, setFormatsOpt] = useState<FormatDTO[]>()
     const [levelsOpt, setLevelsOpt] = useState<LevelDTO[]>()
     const [locationsOpt, setLocationsOpt] = useState<LocationDTO[]>()
     const [eventTypesOpt, setEventTypesOpt] = useState<EventTypeDTO[]>()
-    const [openSlotsModal, setOpenSlotsModal] = useState(false)
-    const [filteredSessionsModal, setFilteredSessionsModal] = useState<SessionsDTO[]>([])
 
-    const wraperRef = useRef(null)
+    const htmlToEditorState = (html: string) => {
+        const contentState = stateFromHTML(html)
+        return EditorState.createWithContent(contentState)
+    }
 
-    const contentState = stateFromHTML(newSession.description)
-
-    const [richTextEditor, setRichTextEditor] = useState<EditorState>(EditorState.createWithContent(contentState))
+    const [richTextEditor, setRichTextEditor] = useState<EditorState>(htmlToEditorState(description))
 
     const onEditorStateChange = (editorState: EditorState) => {
         setRichTextEditor(editorState)
@@ -100,9 +91,33 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
         setNewSession({ ...newSession, description: html })
     }
 
-    const handleAddTeamMember = () => {
-        setNewSession({ ...newSession, team_members: [...newSession.team_members, teamMember] })
-        setTeamMember({ name: "", role: "Speaker" })
+    const handleSelectEventTrack = (eventName: string) => {
+        const selectedEvent = events.find((item) => item.name === eventName)
+        if (!selectedEvent) return
+
+        if (selectedEvent.id === 101) {
+            setNewSession({
+                ...newSession,
+                track: eventName,
+                location: "Other",
+                event_id: selectedEvent.id,
+                event_slug: selectedEvent.slug,
+                event_item_id: selectedEvent.item_id
+            })
+        } else {
+            setNewSession({
+                ...newSession,
+                track: eventName,
+                location: "",
+                event_id: selectedEvent.id,
+                event_slug: selectedEvent.slug,
+                event_item_id: selectedEvent.item_id
+            })
+        }
+    }
+
+    const handleAddTeamMember = ({ userName, role }: { userName: string; role: string }) => {
+        setNewSession({ ...newSession, team_members: [...newSession.team_members, { name: userName, role }] })
         setDisplay(false)
     }
 
@@ -122,10 +137,10 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
         setRerender(!rerender)
     }
 
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent) => {
         const { current: wrap } = wraperRef as { current: HTMLElement | null }
 
-        if (wrap && !wrap.contains(event.target as Node)) {
+        if (wrap && !wrap.contains(e.target as Node)) {
             setDisplay(false)
         }
     }
@@ -175,6 +190,19 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
             .catch((err) => console.log(err))
     }
 
+    const fetchUsers = async () => {
+        await axios
+            .get("/api/fetchUsers")
+            .then((res) => {
+                setSuggestions(res.data)
+            })
+            .catch((err) => console.log(err))
+    }
+
+    useEffect(() => {
+        fetchUsers()
+    }, [])
+
     useEffect(() => {
         Promise.all([fetchLevels(), fetchEventTypes(), fetchFormats(), fetchLocations(), fetchTraks()])
     }, [])
@@ -187,26 +215,8 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
         }
     }, [])
 
-    const isOverlapping = ({ filteredSeshs }: { filteredSeshs: SessionsDTO[] }) => {
-        const formatDate = moment.utc(newSession.startDate).format("YYYY-MM-DD")
-        const newSessionStart = moment.utc(`${formatDate}T${newSession.startTime}`)
-        const newSessionEnd = newSessionStart.clone().add(newSession.duration, "minutes")
-
-        for (const idx of filteredSeshs) {
-            const sessionStart = moment.utc(`${idx.startDate}T${idx.startTime}`)
-            const sessionEnd = sessionStart.clone().add(idx.duration, "minutes")
-
-            if (
-                (newSessionStart.isSameOrAfter(sessionStart) && newSessionStart.isBefore(sessionEnd)) ||
-                (newSessionEnd.isAfter(sessionStart) && newSessionEnd.isSameOrBefore(sessionEnd)) ||
-                (newSessionStart.isSameOrBefore(sessionStart) && newSessionEnd.isSameOrAfter(sessionEnd))
-            ) {
-                return true
-            }
-        }
-
-        return false
-    }
+    const isOverlapping = (filteredSessions: SessionsDTO[]) =>
+        filteredSessions.some((item) => !(endTime <= item.startTime || startTime >= item.end_time))
 
     const handleNextStep = () => {
         if (
@@ -214,22 +224,12 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
             newSession.description.length === 0 ||
             newSession.location === "" ||
             newSession.team_members.length === 0 ||
-            newSession.startTime === "00"
+            newSession.track === "" ||
+            newSession.startTime === "" ||
+            maxRsvp === "0" ||
+            maxRsvp === ""
         ) {
             return toast.error("Please fill all inputs required.", {
-                position: "top-center",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light"
-            })
-        }
-
-        if (newSession.duration === "0") {
-            return toast.error("Please fill duration time field.", {
                 position: "top-center",
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -246,7 +246,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
         let filteredSeshs = sessions
             .filter((item) => item.location.toLocaleLowerCase() === selectedLocation)
             .filter((item) => {
-                const formatDate = moment.utc(newSession.startDate).format("YYYY-MM-DD")
+                const formatDate = moment.utc(startDate).format("YYYY-MM-DD")
 
                 const selectedDate = moment.utc(formatDate)
                 const newSessionStartDate = moment.utc(item.startDate)
@@ -256,7 +256,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
 
         filteredSeshs = filteredSeshs.filter((item) => item.id !== sessionId)
 
-        if (isOverlapping({ filteredSeshs })) {
+        if (isOverlapping(filteredSeshs)) {
             return toast.error("Session already booked on that Date and Time.", {
                 position: "top-center",
                 autoClose: 3000,
@@ -269,51 +269,19 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
             })
         }
         setSteps(2)
-
-        setSteps(2)
     }
 
-    const handleOpenSlotsAvailable = () => {
-        const selectedLocation = newSession.location.toLocaleLowerCase()
-
-        const filteredSeshs = sessions
-            .filter((item) => item.location.toLocaleLowerCase() === selectedLocation)
-            .filter((item) => {
-                const formatDate = moment.utc(newSession.startDate).format("YYYY-MM-DD")
-
-                const selectedDate = moment.utc(formatDate)
-                const newSessionStartDate = moment.utc(item.startDate)
-
-                return selectedDate.isSame(newSessionStartDate)
-            })
-
-        setFilteredSessionsModal(filteredSeshs)
-    }
+    const teamMembersCheck = team_members.map((item) => item.name)
+    const checkIfAnyOtherSuggestion =
+        suggestions
+            .filter((item) => !teamMembersCheck.includes(item.userName))
+            .filter(({ userName }) => userName.toLowerCase().indexOf(teamMemberInput.toLowerCase()) > -1).length !== 0
 
     return (
         <div className="flex flex-col w-full">
-            <SlotsAvailableModal
-                closeModal={setOpenSlotsModal}
-                isOpen={openSlotsModal}
-                sessions={filteredSessionsModal}
-                startDate={startDate}
-                location={location}
-            />
-            <ToastContainer
-                position="top-center"
-                autoClose={3000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="light"
-            />
-            <div className="flex flex-col gap-1 my-1 w-full">
+            <div className="flex flex-col gap-1 my-2 w-full">
                 <label htmlFor="name" className="font-[600]">
-                    Title*
+                    Session Title*
                 </label>
                 <input
                     className="border-[#C3D0CF] border-2 p-1 rounded-[8px] h-[42px]"
@@ -324,7 +292,105 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
                     onChange={(e) => setNewSession({ ...newSession, name: e.target.value })}
                 />
             </div>
-            <div className="flex flex-col gap-1 my-1 w-full">
+
+            <div className="flex flex-col gap-1 my-2 w-full">
+                <label htmlFor="name" className="font-[600]">
+                    Event Track*
+                </label>
+                <select
+                    id="track"
+                    name="track"
+                    disabled={checkIfAnyOtherSuggestion}
+                    className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px]"
+                    onChange={(e) => handleSelectEventTrack(e.target.value)}
+                    value={track}
+                >
+                    <option value="">Select Option</option>
+                    {tracksOpt &&
+                        tracksOpt.map((item, index) => (
+                            <option key={index} value={item.type}>
+                                {item.type}
+                            </option>
+                        ))}
+                </select>
+            </div>
+
+            {event_id !== 101 && (
+                <div className="flex flex-col gap-1 w-full my-2">
+                    <label htmlFor="location" className="font-[600]">
+                        Location*
+                    </label>
+                    <select
+                        id="location"
+                        name="location"
+                        value={newSession.location}
+                        className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
+                        onChange={(e) => setNewSession({ ...newSession, location: e.target.value })}
+                    >
+                        <option value="Select Location">Select Location</option>
+                        {locationsOpt &&
+                            locationsOpt.map((item, index) => (
+                                <option key={index} value={item.location}>
+                                    {item.location}
+                                </option>
+                            ))}
+                    </select>
+                </div>
+            )}
+
+            <div className="flex flex-col md:flex-row w-full gap-5 my-2">
+                <div className="flex flex-col w-full md:w-2/6 z-[10]">
+                    <label className="font-[600]">Date*</label>
+                    <DatePicker
+                        className="border-[#C3D0CF] border-2 p-1 rounded-[8px] h-[42px] w-full"
+                        selected={new Date(startDate)}
+                        onChange={(e: any) => {
+                            const newDate = moment.utc(e).format("YYYY-MM-DD")
+                            setNewSession({ ...newSession, startDate: newDate })
+                        }}
+                        minDate={moment().toDate()}
+                    />
+                </div>
+                <div className="flex flex-col w-full md:w-2/6">
+                    <label htmlFor="startTime" className="font-[600]">
+                        Start Time*
+                    </label>
+                    <TimeDropdown
+                        id="startTime"
+                        value={startTime}
+                        onChange={(e: any) => setNewSession({ ...newSession, startTime: e.target.value })}
+                    />
+                </div>
+                <div className="flex flex-col w-full md:w-2/6">
+                    <label htmlFor="startTime" className="font-[600]">
+                        End Time*
+                    </label>
+                    <TimeDropdown
+                        id="endTime"
+                        value={endTime}
+                        onChange={(e: any) => setNewSession({ ...newSession, endTime: e.target.value })}
+                    />
+                </div>
+            </div>
+
+            {location === "Other" ? (
+                <div className="flex flex-col gap-1 w-full mt-2">
+                    <label htmlFor="custom_location" className="font-[600]">
+                        Specify location
+                    </label>
+                    <input
+                        type="text"
+                        placeholder="Specify Location"
+                        className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
+                        value={newSession.custom_location}
+                        onChange={(e) => setNewSession({ ...newSession, custom_location: e.target.value })}
+                    />
+                </div>
+            ) : (
+                ""
+            )}
+
+            <div className="flex flex-col gap-1 my-2 w-full">
                 <label htmlFor="info" className="font-[600]">
                     Description*
                 </label>
@@ -341,164 +407,65 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
                     )}
                 </div>
             </div>
-            {newSession.event_id !== 101 ? (
-                <div className="flex flex-col gap-1 w-full">
-                    <label htmlFor="location" className="font-[600]">
-                        Location*
-                    </label>
-                    <select
-                        id="location"
-                        name="location"
-                        value={location}
-                        className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
-                        onChange={(e) => setNewSession({ ...newSession, location: e.target.value })}
-                    >
-                        <option value="Select Location">Select Location</option>
-                        {locationsOpt &&
-                            locationsOpt.map((item, index) => (
-                                <option key={index} value={item.location}>
-                                    {item.location}
-                                </option>
-                            ))}
-                    </select>
-                </div>
-            ) : (
-                ""
-            )}
-
-            {location === "Other" ? (
-                <div className="flex flex-col gap-1 w-full mt-2">
-                    <label htmlFor="custom_location" className="font-[600]">
-                        Specify location
-                    </label>
-                    <input
-                        type="text"
-                        placeholder="Specify Location"
-                        className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
-                        value={custom_location}
-                        onChange={(e) => setNewSession({ ...newSession, custom_location: e.target.value })}
-                    />
-                </div>
-            ) : (
-                ""
-            )}
-            <div className="flex flex-col justify-start my-2">
-                <label className="font-[600]">Start Date*</label>
-                <DatePicker
-                    className="border-[#C3D0CF] border-2 p-1 rounded-[8px] h-[42px] w-full"
-                    selected={moment(newSession.startDate, "YYYY-MM-DDTHH:mm:ss").toDate()}
-                    onChange={(e: any) => {
-                        const localDate = new Date(e.getFullYear(), e.getMonth(), e.getDate())
-                        setNewSession({ ...newSession, startDate: localDate })
-                    }}
-                />
-            </div>
-
-            {startDate && location && location !== "Other" && event_id !== 101 && (
-                <div className="flex flex-col justify-start my-2">
-                    <button
-                        onClick={() => {
-                            handleOpenSlotsAvailable()
-                            setOpenSlotsModal(true)
-                        }}
-                        className="flex flex-row font-[600] w-full justify-center items-center py-[8px] px-[16px] gap-[8px] bg-[#35655F] rounded-[8px] text-white text-[16px]"
-                    >
-                        Check Unavailable Slots ({moment.utc(startDate).format("MM/DD/YYYY")})
-                    </button>
-                </div>
-            )}
-
-            <div className="flex flex-row w-full gap-5 my-2">
-                <div className="flex flex-col w-3/6">
-                    <label htmlFor="startTime" className="font-[600]">
-                        Start Time* (24h format)
-                    </label>
-                    <MaskedInput
-                        id="startTime"
-                        className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
-                        mask={[/\d/, /\d/, ":", /\d/, /\d/]}
-                        value={startTime}
-                        onChange={(e) => setNewSession({ ...newSession, startTime: e.target.value })}
-                        placeholder="18:00"
-                    />
-                </div>
-                <div className="flex flex-col w-3/6">
-                    <label htmlFor="duration" className="font-[600]">
-                        Duration* (Minutes)
-                    </label>
-                    <input
-                        type="text"
-                        id="duration"
-                        placeholder="60m"
-                        className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
-                        value={duration}
-                        onChange={(e) => setNewSession({ ...newSession, duration: e.target.value })}
-                    />
-                </div>
-            </div>
 
             <div className="flex flex-col gap-4 w-full my-8">
-                <div className="flex flex-col md:flex-row w-full gap-4">
-                    <div className="flex flex-col md:w-3/6 w-full">
-                        <label htmlFor="team-members" className="font-[600]">
-                            Organizers*
-                        </label>
+                <label htmlFor="tags" className="font-[600]">
+                    Organizers*
+                </label>
+                <div className="flex flex-col relative" ref={wraperRef}>
+                    <div className="flex flex-row gap-4">
                         <input
-                            id="tags"
+                            id="organizers"
                             type="text"
-                            className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
-                            placeholder="Add team member"
-                            value={teamMember.name}
-                            onChange={(e) => setTeamMember({ ...teamMember, name: e.target.value })}
+                            className="border-[#C3D0CF] w-full border-2 p-1 rounded-[8px] h-[42px]"
+                            placeholder="People or organizations. Type to search for people"
+                            value={teamMemberInput}
+                            onChange={(e) => setTeamMemberInput(e.target.value)}
+                            onClick={() => setDisplay(true)}
                         />
                     </div>
-                    <div className="flex flex-col w-full md:w-3/6">
-                        <label htmlFor="role" className="font-[600]">
-                            Role*
-                        </label>
-                        <select
-                            id="role"
-                            name="role"
-                            className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
-                            onChange={(e) => setTeamMember({ ...teamMember, role: e.target.value })}
-                        >
-                            <option value="Speaker">Speaker</option>
-                            <option value="Organizer">Organizer</option>
-                            <option value="Facilitator">Facilitator</option>
-                        </select>
+                    {display && (
+                        <div className="border border-[#C3D0CF] py-2 rounded-[8px] custom-shadow bg-white flex flex-col absolute top-[45px] w-full z-10">
+                            {checkIfAnyOtherSuggestion ? (
+                                suggestions
+                                    .filter((item) => !teamMembersCheck.includes(item.userName))
+                                    .filter((item) => item.userName.toLocaleLowerCase().includes(teamMemberInput))
+                                    .map((item, index) => (
+                                        <div
+                                            key={index}
+                                            onClick={() =>
+                                                handleAddTeamMember({ userName: item.userName, role: item.role })
+                                            }
+                                            className="flex h-[40px] text-[12px] items-center px-2 uppercase hover:bg-[#CBE9E4] cursor-pointer transition duration-300 ease-in-out"
+                                        >
+                                            <span>{item.userName}</span>
+                                        </div>
+                                    ))
+                            ) : (
+                                <div className="flex h-[40px] items-center text-[12px] px-2 uppercase hover:bg-black hover:text-white cursor-pointer transition duration-300 ease-in-out">
+                                    <span>No user found</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    <div className="flex flex-wrap gap-2 py-2">
+                        {team_members.length > 0 &&
+                            team_members.map((item, index) => (
+                                <div
+                                    key={index}
+                                    className="flex gap-2 items-center justify-center w-auto bg-[#E4EAEA] p-1 text-[14px] rounded-[4px]"
+                                >
+                                    <NextImage src={UserIcon} width={25} height={25} />
+                                    <p>{item.name}</p>
+                                    <h1 className="cursor-pointer" onClick={() => handleRemoveTeamMember(index)}>
+                                        x
+                                    </h1>
+                                </div>
+                            ))}
                     </div>
                 </div>
-                <div className="flex flex-col gap-4">
-                    <button
-                        className="flex flex-row font-[600] w-full justify-center items-center py-[8px] px-[16px] gap-[8px] bg-[#35655F] rounded-[8px] text-white text-[16px]"
-                        onClick={() => handleAddTeamMember()}
-                    >
-                        ADD
-                    </button>
-                    <ul className="flex flex-row items-center">
-                        {team_members.map((item, index) => (
-                            <div
-                                className="flex flex-row items-center bg-[#E4EAEA] py-[4px] px-[8px] gap-[8px] text-sm rounded-[4px] mr-[8px] cursor-pointer"
-                                key={index}
-                                onClick={() => handleRemoveTeamMember(index)}
-                            >
-                                {item.role === "Speaker" && (
-                                    <NextImage src={"/user-icon-6.svg"} alt="user-icon-6" width={24} height={24} />
-                                )}
-                                {item.role === "Organizer" && (
-                                    <NextImage src={"/user-icon-4.svg"} alt="user-icon-6" width={24} height={24} />
-                                )}
-                                {item.role === "Facilitator" && (
-                                    <NextImage src={"/user-icon-5.svg"} alt="user-icon-6" width={24} height={24} />
-                                )}
-                                <p className="text-[#1C2928] font-[400] text-[16px]">
-                                    {item.role}: <span className="font-[600] capitalize">{item.name}</span>
-                                </p>
-                            </div>
-                        ))}
-                    </ul>
-                </div>
             </div>
+
             <div className="flex flex-col gap-4 w-full mb-8">
                 <div className="flex flex-col gap-4">
                     <label htmlFor="tags" className="font-[600]">
@@ -532,30 +499,26 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
                     ))}
                 </ul>
             </div>
-
             <div className="flex flex-col gap-1 my-2">
-                <label htmlFor="tags">Track:</label>
-                <select
-                    id="track"
-                    name="track"
-                    className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px]"
-                    onChange={(e) => setNewSession({ ...newSession, track: e.target.value })}
-                    value={track}
-                >
-                    {tracksOpt &&
-                        tracksOpt.map((item, index) => (
-                            <option key={index} value={item.type}>
-                                {item.type}
-                            </option>
-                        ))}
-                </select>
+                <label htmlFor="level" className="font-[600]">
+                    What is the maximum number of RSVPs allowed?*
+                </label>
+
+                <input
+                    id="maximum-rsvp"
+                    type="number"
+                    value={maxRsvp}
+                    className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
+                    placeholder="Ex: 40"
+                    onChange={(e) => setNewSession({ ...newSession, maxRsvp: e.target.value })}
+                />
             </div>
             <div className="flex flex-col gap-1 my-2">
                 <label htmlFor="tags">Format:</label>
                 <select
                     id="format"
                     name="format"
-                    value={format}
+                    value={newSession.format}
                     className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px]"
                     onChange={(e) => setNewSession({ ...newSession, format: e.target.value })}
                 >
@@ -572,7 +535,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
                 <select
                     id="type"
                     name="type"
-                    value={event_type}
+                    value={newSession.event_type}
                     className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px]"
                     onChange={(e) => setNewSession({ ...newSession, event_type: e.target.value })}
                 >
@@ -582,9 +545,6 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
                                 {item.type}
                             </option>
                         ))}
-                    <option value="Workshop">Workshop</option>
-                    <option value="Lecture">Lecture</option>
-                    <option value="Other">Other</option>
                 </select>
             </div>
             <div className="flex flex-col gap-1 my-2">
@@ -592,7 +552,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
                 <select
                     id="level"
                     name="level"
-                    value={level}
+                    value={newSession.level}
                     className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px]"
                     onChange={(e) => setNewSession({ ...newSession, level: e.target.value })}
                 >
@@ -604,7 +564,15 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, sessionId }: Pro
                         ))}
                 </select>
             </div>
-            <div className="w-full flex flex-col my-10 items-start">
+            <div className="w-full flex flex-col md:flex-row gap-5 justify-center items-center my-5">
+                <button
+                    type="button"
+                    className="w-full flex flex-row border-zulalu-primary border font-[600] justify-center items-center py-[8px] px-[16px] gap-[8px] bg-white rounded-[8px] text-black text-[16px]"
+                    onClick={() => setSteps(1)}
+                >
+                    <IoMdArrowBack size={20} />
+                    BACK
+                </button>
                 <button
                     type="button"
                     className="w-full lex flex-row font-[600] justify-center items-center py-[8px] px-[16px] gap-[8px] bg-[#35655F] rounded-[8px] text-white text-[16px]"

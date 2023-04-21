@@ -13,7 +13,6 @@ type Props = {
 }
 
 const EditProfileModal = ({ isOpen, closeModal, userProfile, reRender, setRerender }: Props) => {
-    console.log("user profile: ", userProfile)
     const questionTextRef = useRef(null)
     const [isLoading, setIsLoading] = useState(false)
     const [profile, setProfile] = useState({

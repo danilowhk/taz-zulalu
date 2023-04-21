@@ -60,7 +60,7 @@ export interface SessionsDTO {
         role: string
     }[]
     track: string
-    endTime: any
+    end_time: string
     type: any
     events: EventsDTO
     quota_id: number

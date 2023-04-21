@@ -4,11 +4,10 @@ import { useRouter } from "next/router"
 import { Fragment, useRef, useState } from "react"
 import axios from "axios"
 
+import moment from "moment"
 import ModalSteps from "./ModalSteps"
 import Step1 from "./Step1"
 import Step2 from "./Step2"
-import Step3 from "./Step3"
-import Step4 from "./Step4"
 import { EventsDTO, SessionsDTO } from "../../types"
 
 type NewSessionState = {
@@ -16,6 +15,7 @@ type NewSessionState = {
     equipment: string
     event_id: number
     event_type: string
+    maxRsvp: string
     format: string
     hasTicket: boolean
     info: string
@@ -23,7 +23,8 @@ type NewSessionState = {
     location: string
     custom_location: string
     name: string
-    startDate: Date
+    startDate: string
+    endTime: string
     startTime: string
     tags: string[]
     team_members: {
@@ -32,7 +33,6 @@ type NewSessionState = {
     }[]
     track: string
     event_slug: string
-    duration: string
     event_item_id: number
 }
 
@@ -40,10 +40,13 @@ type Props = {
     isOpen: boolean
     closeModal: (b: boolean) => void
     events: EventsDTO[]
+    event?: EventsDTO
     sessions: SessionsDTO[]
 }
 
-const CalendarSessionModal = ({ isOpen, closeModal, events, sessions }: Props) => {
+const CalendarSessionModal = ({ isOpen, closeModal, events, sessions, event }: Props) => {
+    const checkIfSessionByEventPage = !!event
+
     const router = useRouter()
     const questionTextRef = useRef(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -52,29 +55,29 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions }: Props) =
         description: "",
         name: "",
         team_members: [],
-        startDate: new Date(),
+        startDate: moment.utc().format("YYYY-MM-DD"),
         startTime: "",
+        endTime: "",
         location: "",
         custom_location: "",
         tags: [],
         info: "",
-        event_id: 97,
         hasTicket: false,
-        duration: "0",
         format: "Live",
+        maxRsvp: "",
         level: "Beginner",
         equipment: "",
-        track: "ZK Week",
+        track: checkIfSessionByEventPage ? event.name : "",
+        event_id: checkIfSessionByEventPage ? event.id : 97,
         event_type: "Workshop",
-        event_slug: "CoordiNations",
-        event_item_id: 111
+        event_slug: checkIfSessionByEventPage ? event.slug : "",
+        event_item_id: checkIfSessionByEventPage ? event.item_id : 111
     })
 
     const [amountTickets, setAmountTickets] = useState("0")
 
     const handleSubmit = async () => {
         setIsLoading(true)
-        const formattedTime = `${newSession.startTime}:00`
 
         try {
             if (newSession.hasTicket) {
@@ -103,14 +106,12 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions }: Props) =
                 const createEventDB = await axios.post("/api/createSession", {
                     ...newSession,
                     subEventId: subEventRes.data.id,
-                    startTime: formattedTime,
                     quota_id: quotaCreatedRes.data.id
                 })
                 console.log("DB response: ", createEventDB)
             } else {
                 const createEventDB = await axios.post("/api/createSession", {
-                    ...newSession,
-                    startTime: formattedTime
+                    ...newSession
                 })
                 console.log("DB response: ", createEventDB)
             }
@@ -127,25 +128,23 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions }: Props) =
             })
         }
 
-        // refresh to see new event created
-        // router.push(router.asPath)
         router.reload()
 
         // CLEAN EVERYTHING AFTER CREATING EVENT
-
         setIsLoading(false)
         setSteps(1)
         setNewSession({
             description: "",
             name: "",
             team_members: [],
-            startDate: new Date(),
+            startDate: moment.utc().format("YYYY-MM-DD"),
             startTime: "00",
+            endTime: "00",
             location: "Amphitheater",
             custom_location: "",
             tags: [],
             info: "",
-            duration: "0",
+            maxRsvp: "",
             event_id: 97,
             hasTicket: false,
             format: "Live",
@@ -189,17 +188,11 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions }: Props) =
                                 <div className="w-full h-full py-5 px-10">
                                     <div className="flex w-full justify-between items-center">
                                         <h1 className="text-[24px] font-[600]">
-                                            {steps === 1
-                                                ? "Select Subevent"
-                                                : steps === 2
-                                                ? "Session info (for the public)"
-                                                : steps === 3
-                                                ? "Session Logistics (for organizers)"
-                                                : "Review Session"}
+                                            {steps === 1 ? "Session Info" : "Review Session"}
                                         </h1>
                                         <div
                                             onClick={() => closeModal(false)}
-                                            className="cursor-pointer flex p-4 items-center border-2 border-black justify-center w-[25px] h-[25px] rounded-full"
+                                            className="cursor-pointer flex p-4 items-center border-2 border-black justify-center w-[18px] h-[18px] rounded-full"
                                         >
                                             X
                                         </div>
@@ -207,15 +200,9 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions }: Props) =
                                     <ModalSteps steps={steps} />
                                     {steps === 1 && (
                                         <Step1
+                                            checkIfSessionByEventPage={checkIfSessionByEventPage}
+                                            event={event}
                                             events={events}
-                                            setSteps={setSteps}
-                                            newSession={newSession}
-                                            setNewSession={setNewSession}
-                                        />
-                                    )}
-
-                                    {steps === 2 && (
-                                        <Step2
                                             setSteps={setSteps}
                                             newSession={newSession}
                                             setNewSession={setNewSession}
@@ -223,18 +210,8 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions }: Props) =
                                         />
                                     )}
 
-                                    {steps === 3 && (
-                                        <Step3
-                                            setSteps={setSteps}
-                                            newSession={newSession}
-                                            setNewSession={setNewSession}
-                                            setAmountTickets={setAmountTickets}
-                                            amountTickets={amountTickets}
-                                        />
-                                    )}
-
-                                    {steps === 4 && (
-                                        <Step4
+                                    {steps === 2 && (
+                                        <Step2
                                             setSteps={setSteps}
                                             newSession={newSession}
                                             isLoading={isLoading}

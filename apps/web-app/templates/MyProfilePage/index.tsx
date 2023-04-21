@@ -27,7 +27,6 @@ const MyProfilePage = ({ events, sessions }: Props) => {
     const [profile, setProfile] = useState<any>()
     const [reRender, setRerender] = useState(false)
 
-    const isOrganizer = userRole === "resident"
     async function getUserTickets() {
         try {
             console.log(userInfo!.email)
