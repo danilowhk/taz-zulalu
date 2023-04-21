@@ -110,7 +110,7 @@ const ParticipateButton = ({ session, isTallButton }: Props) => {
                             handleBuyTicket={handleBuyTicket}
                         />
                     </>
-                ) : (
+                ) : !session.capacity || session.totalParticipants < session.capacity ? (
                     <button
                         className={`bg-[#35655F] w-full md:w-auto justify-center text-white py-[${
                             isTallButton ? 8 : 4
@@ -118,6 +118,16 @@ const ParticipateButton = ({ session, isTallButton }: Props) => {
                         onClick={() => handleClickAttend(session.id)}
                     >
                         RSVP
+                    </button>
+                ) : (
+                    <button
+                        disabled={true}
+                        className={`flex gap-2 md:w-auto w-full justify-center items-center bg-white border border-primary text-zulalu-primary font-[600] py-[${
+                            isTallButton ? 8 : 4
+                        }px] px-[16px] rounded-[8px] cursor-default`}
+                    >
+                        <NextImage src={"/vector-x.svg"} width={16} height={16} />
+                        SESSION FULL
                     </button>
                 ))}
         </>

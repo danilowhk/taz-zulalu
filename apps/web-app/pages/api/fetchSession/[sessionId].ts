@@ -29,14 +29,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         const response = await supabase
             .from("sessions")
-            .select("*, events (*), participants (*), favoritedSessions:favorited_sessions (*)")
+            .select(
+                "*, events (*), participants (*), favoritedSessions:favorited_sessions (*), totalParticipants:participants (count)"
+            )
             .eq("id", req.query.sessionId)
             .eq("participants.user_id", userId)
             .eq("favorited_sessions.user_id", userId)
             .single()
 
-        if (response.error === null) res.status(200).send({session: response.data, userId: userId})
-        else res.status(response.status).send(response.error)
+        if (response.error === null) {
+            const formattedData = { ...response.data, totalParticipants: response.data.totalParticipants[0].count }
+            res.status(200).send({ session: formattedData, userId })
+        } else res.status(response.status).send(response.error)
     } catch (err: any) {
         console.log("error: ", err)
         res.status(500).json({ statusCode: 500, message: err })

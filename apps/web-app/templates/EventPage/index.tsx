@@ -214,7 +214,7 @@ const EventPage = ({ event, sessions, allSessions }: Props) => {
                     </div>
                 </div>
                 <div className="flex flex-col lg:flex-row w-full justify-start bg-white rounded-[16px] h-full">
-                    <div className="hidden md:flex h-full max-w-[1014px] w-full rounded-l-[16px] overflow-hidden">
+                    <div className="hidden md:flex h-full max-w-[800px] w-full rounded-lt-[16px] overflow-hidden">
                         <NextImage
                             src={event.image_url}
                             objectFit="cover"
