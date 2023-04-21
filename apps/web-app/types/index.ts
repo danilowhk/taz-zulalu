@@ -44,7 +44,6 @@ export interface SessionsDTO {
     format: string
     duration: string
     hasTicket: boolean
-    capacity: number
     id: number
     info: string
     level: string

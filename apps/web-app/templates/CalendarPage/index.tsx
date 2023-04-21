@@ -238,7 +238,6 @@ const CalendarPage = ({ sessions, events }: Props) => {
                             closeModal={setOpenAddSessionModal}
                             isOpen={openAddSessionModal}
                             events={events}
-                            event={null}
                             sessions={sessions}
                         />
 

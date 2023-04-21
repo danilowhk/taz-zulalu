@@ -49,7 +49,7 @@ type Props = {
     setSteps: (steps: number) => void
     sessions: SessionsDTO[]
     events: EventsDTO[]
-    event: EventsDTO | null
+    event?: EventsDTO
     checkIfSessionByEventPage: boolean
 }
 

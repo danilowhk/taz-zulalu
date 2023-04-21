@@ -40,7 +40,7 @@ type Props = {
     isOpen: boolean
     closeModal: (b: boolean) => void
     events: EventsDTO[]
-    event: EventsDTO | null
+    event?: EventsDTO
     sessions: SessionsDTO[]
 }
 
