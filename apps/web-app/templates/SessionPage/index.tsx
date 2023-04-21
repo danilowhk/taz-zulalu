@@ -6,7 +6,7 @@ import Link from "next/link"
 import moment from "moment"
 import { Parser } from "html-to-react"
 
-import { SessionsDTO } from "../../types"
+import { EventsDTO, SessionsDTO } from "../../types"
 import BaseTemplate from "../Base"
 import DeleteSessionModal from "../../components/DeleteSessionModal"
 import EditSessionModal from "../../components/EditSessionModal"
@@ -18,9 +18,10 @@ type Props = {
     session: SessionsDTO
     sessions: SessionsDTO[]
     userId: number
+    events: EventsDTO[]
 }
 
-const SessionPage = ({ session, sessions, userId }: Props) => {
+const SessionPage = ({ session, sessions, userId, events }: Props) => {
     const router = useRouter()
     const { userInfo } = useUserAuthenticationContext()
     const { startDate, location, startTime, custom_location } = session
@@ -91,8 +92,7 @@ const SessionPage = ({ session, sessions, userId }: Props) => {
                             closeModal={setOpenEditSessionModal}
                             session={session}
                             sessions={sessions}
-                            reRender={reRender}
-                            setReRender={setReRender}
+                            events={events}
                         />
                         {checkOrganizerOrCreator && (
                             <button

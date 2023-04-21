@@ -44,6 +44,7 @@ export interface SessionsDTO {
     format: string
     duration: string
     hasTicket: boolean
+    capacity: number
     id: number
     info: string
     level: string
@@ -60,7 +61,7 @@ export interface SessionsDTO {
         role: string
     }[]
     track: string
-    endTime: any
+    end_time: string
     type: any
     events: EventsDTO
     quota_id: number

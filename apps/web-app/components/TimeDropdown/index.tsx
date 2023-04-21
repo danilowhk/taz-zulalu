@@ -10,10 +10,11 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ id, value, onChange }) => {
     const times = []
 
     for (let i = 0; i < 24; i++) {
-        for (let j = 0; j < 2; j++) {
+        for (let j = 0; j < 4; j++) {
             const hour = i < 10 ? `0${i}` : i
-            const minute = j === 0 ? "00" : "30"
-            times.push(`${hour}:${minute}`)
+            const minute = j * 15
+            const minuteString = minute < 10 ? `0${minute}` : minute
+            times.push(`${hour}:${minuteString}`)
         }
     }
 
@@ -24,7 +25,7 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ id, value, onChange }) => {
             value={value}
             onChange={onChange}
         >
-            <option value="" disabled selected>
+            <option value="" disabled>
                 Please Select
             </option>
             {times.map((time, index) => (

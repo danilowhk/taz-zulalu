@@ -1,17 +1,16 @@
 /* eslint-disable @typescript-eslint/no-shadow */
-import React, { useEffect, useRef, useState, useCallback } from "react"
+import React, { useEffect, useRef, useState } from "react"
 
 import NextImage from "next/image"
 import Link from "next/link"
-
+import { toSvg } from "jdenticon"
 import moment from "moment"
-import AddSessionModal from "../../components/AddSessionModal"
+import CalendarSessionModal from "../../components/CalendarSessionModal"
 import Sessions from "../../components/Sessions"
 import { EventsDTO, SessionsDTO } from "../../types"
 import BaseTemplate from "../Base"
 import { useUserAuthenticationContext } from "../../context/UserAuthenticationContext"
 import StyledDatePicker from "../../components/StyledDatePicker"
-import { toSvg } from "jdenticon"
 
 type Props = {
     event: EventsDTO
@@ -20,7 +19,7 @@ type Props = {
 }
 
 const EventPage = ({ event, sessions, allSessions }: Props) => {
-    const { userInfo, userRole } = useUserAuthenticationContext()
+    const { userInfo } = useUserAuthenticationContext()
     const [openAddSessionModal, setOpenAddSessionModal] = useState(false)
     const [speakers, setSpeakers] = useState<string[]>([])
 
@@ -280,10 +279,11 @@ const EventPage = ({ event, sessions, allSessions }: Props) => {
                                 CREATE SESSION
                             </button>
                         )}
-                        <AddSessionModal
+                        <CalendarSessionModal
                             closeModal={setOpenAddSessionModal}
                             isOpen={openAddSessionModal}
                             event={event}
+                            events={[]}
                             sessions={allSessions}
                         />
                         <div className="flex flex-col md:flex-row justify-center md:justify-end items:start md:items-center gap-2 md:gap-2 w-full">

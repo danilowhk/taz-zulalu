@@ -1,16 +1,17 @@
 import { GetServerSideProps } from "next"
 import axios from "axios"
 import SessionPage from "../../../../templates/SessionPage"
-import { SessionsDTO } from "../../../../types"
+import { EventsDTO, SessionsDTO } from "../../../../types"
 
 type Props = {
     session: SessionsDTO
     sessions: SessionsDTO[]
     userId: number
+    events: EventsDTO[]
 }
 
-const Session = ({ session, sessions, userId }: Props) => (
-    <SessionPage session={session} sessions={sessions} userId={userId} />
+const Session = ({ session, sessions, userId, events }: Props) => (
+    <SessionPage session={session} sessions={sessions} userId={userId} events={events} />
 )
 
 export default Session
@@ -18,6 +19,10 @@ export default Session
 export const getServerSideProps: GetServerSideProps = async ({ req, res, query }) => {
     try {
         const url = process.env.URL_TO_FETCH
+
+        const eventsResponse = await fetch(`${url}/api/fetchEvents`)
+
+        const events: EventsDTO[] = await eventsResponse.json()
 
         const responseSession = await axios.get(`${url}/api/fetchSession/${query.sessionId}`, {
             headers: {
@@ -35,7 +40,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
         const sessions = await responseSessions.data
 
         return {
-            props: { session, sessions, userId }
+            props: { session, sessions, userId, events }
         }
     } catch (error) {
         res.statusCode = 404

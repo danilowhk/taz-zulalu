@@ -8,14 +8,14 @@ import moment from "moment"
 import ModalSteps from "./ModalSteps"
 import Step1 from "./Step1"
 import Step2 from "./Step2"
-import Step3 from "./Step3"
-import { SessionsDTO } from "../../types"
+import { EventsDTO, SessionsDTO } from "../../types"
 
 type NewSessionState = {
     description: string
     equipment: string
     event_id: number
     event_type: string
+    maxRsvp: string
     format: string
     hasTicket: boolean
     info: string
@@ -23,10 +23,9 @@ type NewSessionState = {
     location: string
     custom_location: string
     name: string
-    startDate: Date
-    duration: string
+    startDate: string
+    endTime: string
     startTime: string
-    subevent_id: number
     tags: string[]
     team_members: {
         name: string
@@ -35,7 +34,6 @@ type NewSessionState = {
     track: string
     event_slug: string
     event_item_id: number
-    quota_id: number
 }
 
 type Props = {
@@ -43,38 +41,37 @@ type Props = {
     closeModal: (b: boolean) => void
     session: SessionsDTO
     sessions: SessionsDTO[]
-    reRender: boolean
-    setReRender: Function
+    events: EventsDTO[]
 }
 
-const EditSessionModal = ({ isOpen, closeModal, session, sessions, reRender, setReRender }: Props) => {
+const EditSessionModal = ({ isOpen, closeModal, session, sessions, events }: Props) => {
     const router = useRouter()
     const questionTextRef = useRef(null)
     const [isLoading, setIsLoading] = useState(false)
     const [steps, setSteps] = useState(1)
     const [newSession, setNewSession] = useState<NewSessionState>({
+        description: session.description,
         name: session.name,
         team_members: session.team_members,
-        startDate: session.startDate,
-        duration: session.duration,
+        startDate: moment.utc(session.startDate).format("YYYY-MM-DD"),
         startTime: session.startTime,
+        endTime: session.end_time,
         location: session.location,
         custom_location: session.custom_location,
         tags: session.tags,
         info: session.info,
-        event_id: session.event_id,
         hasTicket: session.hasTicket,
         format: session.format,
+        maxRsvp: String(session.capacity === null ? 0 : session.capacity),
         level: session.level,
         equipment: session.equipment,
-        subevent_id: session.subevent_id,
-        description: session.description,
         track: session.track,
-        event_type: session.event_type,
+        event_id: session.event_id,
+        event_type: session.type,
         event_slug: session.event_slug,
-        event_item_id: session.event_item_id,
-        quota_id: session.quota_id
+        event_item_id: session.event_item_id
     })
+
     const [amountTickets, setAmountTickets] = useState("0")
 
     const handleSubmit = async () => {
@@ -135,27 +132,26 @@ const EditSessionModal = ({ isOpen, closeModal, session, sessions, reRender, set
         setIsLoading(false)
         setSteps(1)
         setNewSession({
+            description: session.description,
             name: session.name,
             team_members: session.team_members,
-            startDate: session.startDate,
-            duration: session.duration,
+            startDate: moment.utc(session.startDate).format("YYYY-MM-DD"),
             startTime: session.startTime,
+            endTime: session.end_time,
             location: session.location,
             custom_location: session.custom_location,
             tags: session.tags,
             info: session.info,
-            event_id: session.event_id,
             hasTicket: session.hasTicket,
             format: session.format,
+            maxRsvp: String(session.capacity),
             level: session.level,
             equipment: session.equipment,
-            subevent_id: session.subevent_id,
-            description: session.description,
             track: session.track,
-            event_type: session.event_type,
+            event_id: session.event_id,
+            event_type: session.type,
             event_slug: session.event_slug,
-            event_item_id: session.event_item_id,
-            quota_id: session.quota_id
+            event_item_id: session.event_item_id
         })
 
         closeModal(false)
@@ -192,15 +188,11 @@ const EditSessionModal = ({ isOpen, closeModal, session, sessions, reRender, set
                                 <div className="w-full h-full py-5 px-10">
                                     <div className="flex w-full justify-between items-center">
                                         <h1 className="text-[24px] font-[600]">
-                                            {steps === 1
-                                                ? "Session Info (for the public)"
-                                                : steps === 2
-                                                ? "Session Logistics (for organizers)"
-                                                : "Review Session"}
+                                            {steps === 1 ? "Session Info" : "Review Session"}
                                         </h1>
                                         <div
                                             onClick={() => closeModal(false)}
-                                            className="cursor-pointer flex items-center border-2 border-black justify-center w-[25px] h-[25px] rounded-full"
+                                            className="cursor-pointer flex p-4 items-center border-2 border-black justify-center w-[18px] h-[18px] rounded-full"
                                         >
                                             X
                                         </div>
@@ -213,26 +205,16 @@ const EditSessionModal = ({ isOpen, closeModal, session, sessions, reRender, set
                                             setSteps={setSteps}
                                             sessions={sessions}
                                             sessionId={session.id}
+                                            events={events}
                                         />
                                     )}
 
                                     {steps === 2 && (
                                         <Step2
                                             setSteps={setSteps}
-                                            setAmountTickets={setAmountTickets}
-                                            amountTickets={amountTickets}
-                                            newSession={newSession}
-                                            setNewSession={setNewSession}
-                                        />
-                                    )}
-
-                                    {steps === 3 && (
-                                        <Step3
-                                            setSteps={setSteps}
                                             newSession={newSession}
                                             handleSubmit={handleSubmit}
                                             isLoading={isLoading}
-                                            amountTickets={amountTickets}
                                         />
                                     )}
                                 </div>
