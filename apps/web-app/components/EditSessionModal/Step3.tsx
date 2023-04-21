@@ -4,6 +4,7 @@ import { IoMdArrowBack } from "react-icons/io"
 import { Parser } from "html-to-react"
 
 import Loading from "../Loading"
+import { displayDateWithoutTimezone } from "../../data/dateFormat"
 
 type NewSessionState = {
     description: string
@@ -50,7 +51,7 @@ const Step3 = ({ setSteps, newSession, handleSubmit, isLoading }: Props) => {
 
                 <div className="flex items-center gap-2">
                     <NextImage src="/vector-calendar.svg" width={20} height={20} />
-                    <h1>{moment(newSession.startDate).format("dddd, MMMM DD")}</h1>
+                    <h1>{displayDateWithoutTimezone(newSession.startDate)}</h1>
                 </div>
 
                 <div className="flex items-center gap-2">
