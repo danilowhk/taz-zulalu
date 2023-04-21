@@ -25,16 +25,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             location,
             custom_location,
             startTime,
+            endTime,
             tags,
             info,
             hasTicket,
-            event_type,
+            event_id,
             format,
             level,
             equipment,
             team_members,
             track,
             subEventId,
+            event_type,
+            maxRsvp,
+            event_slug,
+            event_item_id,
             quota_id
         } = req.body
 
@@ -45,20 +50,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 description,
                 startDate,
                 location,
-                duration,
-                custom_location,
                 startTime,
+                end_time: endTime,
+                capacity: maxRsvp,
                 tags,
                 info,
+                event_id,
                 hasTicket,
                 event_type,
-                format,
                 level,
+                format,
                 team_members,
                 track,
                 equipment,
                 subevent_id: subEventId,
-                quota_id
+                event_slug,
+                event_item_id,
+                quota_id,
+                duration,
+                custom_location
             })
             .eq("id", id)
         console.log("Response: ", response)
