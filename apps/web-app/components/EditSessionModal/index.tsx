@@ -3,12 +3,12 @@ import { toast } from "react-toastify"
 import { useRouter } from "next/router"
 import { Fragment, useRef, useState } from "react"
 import axios from "axios"
-import moment from "moment"
 
 import ModalSteps from "./ModalSteps"
 import Step1 from "./Step1"
 import Step2 from "./Step2"
 import { EventsDTO, SessionsDTO } from "../../types"
+import { displayDateWithoutTimezone } from "../../data/dateFormat"
 
 type NewSessionState = {
     description: string
@@ -53,7 +53,7 @@ const EditSessionModal = ({ isOpen, closeModal, session, sessions, events }: Pro
         description: session.description,
         name: session.name,
         team_members: session.team_members,
-        startDate: moment.utc(session.startDate).format("YYYY-MM-DD"),
+        startDate: displayDateWithoutTimezone(session.startDate),
         startTime: session.startTime,
         endTime: session.end_time,
         location: session.location,
@@ -105,7 +105,6 @@ const EditSessionModal = ({ isOpen, closeModal, session, sessions, events }: Pro
                     ...newSession,
                     id: session.id
                 })
-                console.log("DB response: ", updateSessionDB)
             } else {
                 console.log("only DB update")
                 const updateSessionDB = await axios.post("/api/updateSession", {
@@ -135,7 +134,7 @@ const EditSessionModal = ({ isOpen, closeModal, session, sessions, events }: Pro
             description: session.description,
             name: session.name,
             team_members: session.team_members,
-            startDate: moment.utc(session.startDate).format("YYYY-MM-DD"),
+            startDate: displayDateWithoutTimezone(session.startDate),
             startTime: session.startTime,
             endTime: session.end_time,
             location: session.location,

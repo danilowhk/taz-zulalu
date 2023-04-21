@@ -13,6 +13,7 @@ import EditSessionModal from "../../components/EditSessionModal"
 import ParticipateButton from "../../components/ParticipateButton"
 import FavoriteButton from "../../components/FavoriteButton"
 import { useUserAuthenticationContext } from "../../context/UserAuthenticationContext"
+import { displayDateWithoutTimezone } from "../../data/dateFormat"
 
 type Props = {
     session: SessionsDTO
@@ -24,10 +25,9 @@ type Props = {
 const SessionPage = ({ session, sessions, userId, events }: Props) => {
     const router = useRouter()
     const { userInfo } = useUserAuthenticationContext()
-    const { startDate, location, startTime, custom_location } = session
+    const { startDate, location, name, team_members, startTime, custom_location, end_time } = session
     const [openDeleteSessionModal, setOpenDeleteSessionModal] = useState(false)
     const [openEditSessionModal, setOpenEditSessionModal] = useState(false)
-    const [reRender, setReRender] = useState(false)
 
     const deleteSession = async () => {
         await axios.post("/api/deleteSession", { id: session.id })
@@ -99,11 +99,15 @@ const SessionPage = ({ session, sessions, userId, events }: Props) => {
                                 DELETE SESSION
                             </button>
                         )}
-                        <a href={`https://zuzalu-feedback.appliedzkp.org/session/${session.id}/new`} target="_blank" rel="noopener noreferrer">
+                        <a
+                            href={`https://zuzalu-feedback.appliedzkp.org/session/${session.id}/new`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
                             <button
-                                    className={`flex w-full md:w-auto justify-center gap-2 items-center bg-zulalu-primary border border-primary text-white font-[600] py-[8px] px-[16px] rounded-[8px]`}
-                                >
-                                    LEAVE FEEDBACK
+                                className={`flex w-full md:w-auto justify-center gap-2 items-center bg-zulalu-primary border border-primary text-white font-[600] py-[8px] px-[16px] rounded-[8px]`}
+                            >
+                                LEAVE FEEDBACK
                             </button>
                         </a>
                         <DeleteSessionModal
@@ -117,20 +121,18 @@ const SessionPage = ({ session, sessions, userId, events }: Props) => {
                 <div className="w-full flex flex-col md:flex-row gap-0 md:gap-[8px] h-full">
                     <div className="flex flex-col items-start pt-4 md:pt-[32px] gap-2 px-4 md:px-[32px] pb-4 md:pb-[40px] bg-white rounded-0 md:rounded-[8px] rounded-t-[16px] md:rounded-t-0 w-full md:w-4/6">
                         <div className="flex flex-row items-end">
-                            <p className="text-[30px] md:text-[40px] font-semibold">{session.name}</p>
+                            <p className="text-[30px] md:text-[40px] font-semibold">{name}</p>
                         </div>
                         <div className="flex flex-col md:flex-row flex-wrap items-start md:items-center gap-0 md:gap-[24px]">
                             <div className="flex gap-1 items-center justify-start mt-4">
                                 <NextImage src={"/vector-calendar.svg"} alt="calendar" width={15} height={15} />
                                 <h1 className="text-zulalu-secondary">
-                                    {startDate && moment.utc(startDate).isValid()
-                                        ? moment.utc(startDate).format("dddd, MMMM Do")
-                                        : "\u00A0"}
+                                    {moment(displayDateWithoutTimezone(startDate)).format("dddd, MMMM Do")}
                                 </h1>
                             </div>
                             <div className="flex gap-1 items-center justify-start mt-4">
                                 <NextImage src={"/vector-clock.svg"} alt="calendar" width={15} height={15} />
-                                <h1 className="text-zulalu-secondary">{`${startTime}`}</h1>
+                                <h1 className="text-zulalu-secondary">{`${startTime}:${end_time}`}</h1>
                             </div>
                             <div className="flex gap-1 items-center justify-start mt-4">
                                 <NextImage src={"/vector-location.svg"} alt="calendar" width={15} height={15} />
@@ -142,7 +144,7 @@ const SessionPage = ({ session, sessions, userId, events }: Props) => {
                         <div className="flex flex-col gap-[24px] w-full mt-4">
                             <div className="w-full md:w-5/6 py-5">{reactContent}</div>
                             <div className="flex flex-wrap gap-5 w-full lg:w-3/6 p-0">
-                                {session.team_members.map((item: any, index: any) => (
+                                {team_members.map((item: any, index: any) => (
                                     <div
                                         key={index}
                                         className="flex w-auto rounded-[4px] items-center gap-2 px-2 py-1 bg-[#E4EAEA] text-[16px]"
