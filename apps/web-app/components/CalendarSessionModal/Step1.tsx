@@ -19,12 +19,12 @@ import { TracksDTO, FormatDTO, LevelDTO, LocationDTO, EventTypeDTO, EventsDTO, S
 
 type NewSessionState = {
     description: string
-    equipment: string
     event_id: number
     event_type: string
     maxRsvp: string
     format: string
     hasTicket: boolean
+    equipment: string
     info: string
     level: string
     location: string
@@ -62,8 +62,20 @@ const loadEditor: Loader<EditorProps> = async () => {
 const Editor = dynamic<EditorProps>(loadEditor, { ssr: false })
 
 const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfSessionByEventPage, event }: Props) => {
-    const { name, team_members, startDate, tags, startTime, endTime, location, event_id, description, maxRsvp, track } =
-        newSession
+    const {
+        name,
+        team_members,
+        startDate,
+        tags,
+        startTime,
+        endTime,
+        location,
+        equipment,
+        event_id,
+        description,
+        maxRsvp,
+        track
+    } = newSession
     const wraperRef = useRef(null)
     const [tag, setTag] = useState("")
     const [rerender, setRerender] = useState(true)
@@ -395,6 +407,19 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
                         />
                     )}
                 </div>
+            </div>
+
+            <div className="flex flex-col gap-1 my-2 w-full">
+                <label htmlFor="info" className="font-[600]">
+                    AV + Set up Needs*
+                </label>
+                <textarea
+                    id="equipment"
+                    className="w-full h-[200px] p-4 border border-gray-300 rounded overflow-scroll"
+                    placeholder="Describe your AV + Set up Needs for organizers. Do you need screens? What setup do you need: Workspace with tables and chairs |  Chairs facing presentation stage | No chairs"
+                    value={equipment}
+                    onChange={(e) => setNewSession({ ...newSession, equipment: e.target.value })}
+                />
             </div>
 
             <div className="flex flex-col gap-4 w-full my-8">
