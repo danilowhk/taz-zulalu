@@ -96,25 +96,13 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
         const selectedEvent = events.find((item) => item.name === eventName)
         if (!selectedEvent) return
 
-        if (selectedEvent.id === 101) {
-            setNewSession({
-                ...newSession,
-                track: eventName,
-                location: "Other",
-                event_id: selectedEvent.id,
-                event_slug: selectedEvent.slug,
-                event_item_id: selectedEvent.item_id
-            })
-        } else {
-            setNewSession({
-                ...newSession,
-                track: eventName,
-                location: "",
-                event_id: selectedEvent.id,
-                event_slug: selectedEvent.slug,
-                event_item_id: selectedEvent.item_id
-            })
-        }
+        setNewSession({
+            ...newSession,
+            track: eventName,
+            event_id: selectedEvent.id,
+            event_slug: selectedEvent.slug,
+            event_item_id: selectedEvent.item_id
+        })
     }
 
     const handleAddTeamMember = ({ userName, role }: { userName: string; role: string }) => {
@@ -150,7 +138,10 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
         await axios
             .get("/api/fetchTracks")
             .then((res) => {
-                setTracksOpt(res.data)
+                if (res.data) {
+                    const data = res.data.filter((item: any) => item.type !== "Other")
+                    setTracksOpt(data)
+                }
             })
             .catch((err) => console.log(err))
     }
@@ -223,7 +214,6 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
         if (
             newSession.name.length === 0 ||
             newSession.description.length === 0 ||
-            newSession.location === "" ||
             newSession.team_members.length === 0 ||
             newSession.track === "" ||
             newSession.startTime === "" ||
@@ -428,7 +418,9 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
                             {checkIfAnyOtherSuggestion ? (
                                 suggestions
                                     .filter((item) => !teamMembersCheck.includes(item.userName))
-                                    .filter((item) => item.userName.toLocaleLowerCase().includes(teamMemberInput))
+                                    .filter((item) =>
+                                        item.userName.toLocaleLowerCase().includes(teamMemberInput.toLocaleLowerCase())
+                                    )
                                     .map((item, index) => (
                                         <div
                                             key={index}
