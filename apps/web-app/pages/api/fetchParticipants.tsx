@@ -15,6 +15,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(403).json({ message: "Forbidden" })
         return
     }
+
+    const {
+        data: { session }
+    } = await supabase.auth.getSession()
+
+    if (!session) {
+        return res.status(401).json({
+            error: "not_authenticated",
+            description: "The user does not have an active session or is not authenticated"
+        })
+    }
     
     // If the origin is in the list of allowed origins, set the appropriate CORS headers
     if (typeof origin === "string" && allowedOrigins.includes(origin)) {
