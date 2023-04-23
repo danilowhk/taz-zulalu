@@ -40,9 +40,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 prodId: '//zuzalu.city//sessions//EN',
                 events: response.data.map((session: any) => {
                     const sessionStartDate = new Date(`${session.startDate}T${session.startTime}+02:00`);
-                    let duration = parseFloat(session.duration);
-                    if (isNaN(duration)) {
-                        duration = parseFloat(session.duration.replace(/[^0-9]/g, ''));
+                    // normalize null and string `duration`s into a number with default of 60 minutes
+                    let duration = 60
+                    if (session.duration !== null) {
+                        duration = parseFloat(session.duration)
+                        if (isNaN(duration)) {
+                            duration = parseFloat(session.duration.replace(/[^0-9]/g, ''));
+                        }
                     }
                     const sessionEndDate = new Date(sessionStartDate.getTime() + duration * 60000); // add session duration in minutes
                     const description = `Location: ${session.location}\n\nTags: ${JSON.stringify(session.tags)}\n\nTrack: ${session.track}\n\nFormat: ${session.format}\n\nLevel: ${session.level}\n\n${session.description}\n\n\n\nMore Info: https://zuzalu.city/event/${session.event_id}/session/${session.id}`;
