@@ -108,13 +108,25 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
         const selectedEvent = events.find((item) => item.name === eventName)
         if (!selectedEvent) return
 
-        setNewSession({
-            ...newSession,
-            track: eventName,
-            event_id: selectedEvent.id,
-            event_slug: selectedEvent.slug,
-            event_item_id: selectedEvent.item_id
-        })
+        if (selectedEvent.id === 101) {
+            setNewSession({
+                ...newSession,
+                track: eventName,
+                location: "Other",
+                event_id: selectedEvent.id,
+                event_slug: selectedEvent.slug,
+                event_item_id: selectedEvent.item_id
+            })
+        } else {
+            setNewSession({
+                ...newSession,
+                track: eventName,
+                location: "",
+                event_id: selectedEvent.id,
+                event_slug: selectedEvent.slug,
+                event_item_id: selectedEvent.item_id
+            })
+        }
     }
 
     const handleAddTeamMember = ({ userName, role }: { userName: string; role: string }) => {
@@ -256,6 +268,10 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
 
                 return selectedDate.isSame(newSessionStartDate)
             })
+
+        if (location === "Other") {
+            return setSteps(2)
+        }
 
         if (isOverlapping(filteredSeshs)) {
             return toast.error("Session already booked on that Date and Time.", {
