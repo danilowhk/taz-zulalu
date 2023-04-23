@@ -5,7 +5,27 @@ const supabaseUrl = "https://polcxtixgqxfuvrqgthn.supabase.co"
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY
 const supabase = createClient(supabaseUrl, supabaseKey as string)
 
+const allowedOrigins = ["https://zuzalu.city"]
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    // Check for the 'Origin' header in the request
+    const {origin} = req.headers;
+
+    if (origin !== allowedOrigins[0]){
+        res.status(403).json({ message: "Forbidden" })
+        return
+    }
+    
+    // If the origin is in the list of allowed origins, set the appropriate CORS headers
+    if (typeof origin === "string" && allowedOrigins.includes(origin)) {
+        res.setHeader("Access-Control-Allow-Origin", origin)
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
+    } else {
+        res.status(403).json({ message: "Forbidden" })
+        return
+    }
+
     try {
         const response = await supabase.from("favorited_sessions").select("*,users(*),events(*)")
 
