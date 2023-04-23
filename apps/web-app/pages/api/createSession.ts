@@ -49,41 +49,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 custom_location
             } = req.body
 
-            await supabase
-                .from("sessions")
-                .insert({
-                    name,
-                    description,
-                    startDate,
-                    location,
-                    startTime,
-                    end_time: endTime,
-                    organizers,
-                    capacity: maxRsvp,
-                    tags,
-                    info,
-                    event_id,
-                    hasTicket,
-                    event_type,
-                    level,
-                    format,
-                    team_members,
-                    track,
-                    equipment,
-                    subevent_id: subEventId,
-                    event_slug,
-                    event_item_id,
-                    quota_id,
-                    creator_id: user.data!.id,
-                    duration,
-                    custom_location
-                })
-                .then((response) => {
-                    if (response.error) {
-                        res.status(422).json({ statusCode: 500, message: response.error.message })
-                    }
-                    res.status(201).json("Session created")
-                })
+            const response = await supabase.from("sessions").insert({
+                name,
+                description,
+                startDate,
+                location,
+                startTime,
+                end_time: endTime,
+                organizers,
+                capacity: maxRsvp,
+                tags,
+                info,
+                event_id,
+                hasTicket,
+                event_type,
+                level,
+                format,
+                team_members,
+                track,
+                equipment,
+                subevent_id: subEventId,
+                event_slug,
+                event_item_id,
+                quota_id,
+                creator_id: user.data!.id,
+                duration,
+                custom_location
+            })
+            // .then((response) => {
+            //     if (response.error) {
+            //         res.status(422).json({ statusCode: 500, message: response.error.message })
+            //     }
+            //     res.status(201).json("Session created")
+            // })
+
+            console.log("RESPONSE API CREATE SESSION", response)
+
+            if (response.error) {
+                res.status(422).json({ statusCode: 500, message: response.error.message })
+            }
 
             res.status(201).json("Session created")
         } catch (error) {
