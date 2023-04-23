@@ -35,32 +35,30 @@ const Home = ({ events }: Props) => {
     }
   }
 
-  async function clearAllStorage() {
+  function clearAllStorage() {
     // Clear LocalStorage
     localStorage.clear();
     // Clear SessionStorage
     sessionStorage.clear();
     // Clear all IndexedDB databases
-    await deleteAllIndexedDB();
+    deleteAllIndexedDB();
     // Delete all cache storage
-    await deleteAllCacheStorage();
+    deleteAllCacheStorage();
     // Unregister all service workers
-    await unregisterServiceWorkers();
+    unregisterServiceWorkers();
   }
   
 
-  async function checkAndUpdateVersion() {
+  function checkAndUpdateVersion() {
     const storedVersion = localStorage.getItem(storageVersionKey);
     if (storedVersion !== currentVersion) {
-      await clearAllStorage();
+      clearAllStorage();
       localStorage.setItem(storageVersionKey, currentVersion);
     }
   }
   
   useEffect(() => {
-    (async () => {
-      await checkAndUpdateVersion();
-    })();
+    checkAndUpdateVersion();
   }, []);
 
   return <HomeTemplate events={events} />;
