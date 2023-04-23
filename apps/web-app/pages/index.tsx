@@ -35,6 +35,12 @@ const Home = ({ events }: Props) => {
     }
   }
 
+  function deleteAllCookies() {
+    document.cookie.split(';').forEach((c) => {
+      document.cookie = c.replace(/=.*/, `=;expires=${  new Date().toUTCString()  };path=/`);
+    });
+  }
+
   function clearAllStorage() {
     // Clear LocalStorage
     localStorage.clear();
@@ -46,6 +52,8 @@ const Home = ({ events }: Props) => {
     deleteAllCacheStorage();
     // Unregister all service workers
     unregisterServiceWorkers();
+
+    deleteAllCookies();
   }
   
 
