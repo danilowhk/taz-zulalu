@@ -17,8 +17,6 @@ const Home = ({ events }: Props) => {
     localStorage.clear();
     // Clear SessionStorage
     sessionStorage.clear();
-    // Clear IndexedDB
-    window.indexedDB.deleteDatabase("https://zuzalu.city/");
   }
 
   function checkAndUpdateVersion() {
@@ -47,5 +45,10 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
     return {
       props: { events },
     };
+  } catch (error) {
+    res.statusCode = 404;
+    return {
+      props: {},
+    };
   }
-}
+};
