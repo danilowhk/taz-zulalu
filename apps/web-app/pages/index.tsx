@@ -14,6 +14,16 @@ const Home = ({ events }: Props) => {
   const currentVersion = "1.2.0";
   const storageVersionKey = "myAppVersion";
 
+  async function deleteAllCacheStorage() {
+    const cacheNames = await caches.keys();
+    await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+  }
+
+  async function unregisterServiceWorkers() {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(registrations.map((registration) => registration.unregister()));
+  }
+
   async function deleteAllIndexedDB() {
     try {
       const dbNames = await Dexie.getDatabaseNames();
@@ -25,33 +35,32 @@ const Home = ({ events }: Props) => {
     }
   }
 
-  function clearAllStorage() {
+  async function clearAllStorage() {
     // Clear LocalStorage
     localStorage.clear();
     // Clear SessionStorage
     sessionStorage.clear();
-    window.indexedDB.deleteDatabase("workbox-expiration");
-    window.indexedDB.deleteDatabase("workbox-expiration - https://zuzalu.city/");
-
-    window.indexedDB.deleteDatabase("cache-entries");
-    window.indexedDB.deleteDatabase("cacheName");
-    window.indexedDB.deleteDatabase("timestamp");
-
-    deleteAllIndexedDB();
-
+    // Clear all IndexedDB databases
+    await deleteAllIndexedDB();
+    // Delete all cache storage
+    await deleteAllCacheStorage();
+    // Unregister all service workers
+    await unregisterServiceWorkers();
   }
   
 
-  function checkAndUpdateVersion() {
+  async function checkAndUpdateVersion() {
     const storedVersion = localStorage.getItem(storageVersionKey);
     if (storedVersion !== currentVersion) {
-      clearAllStorage();
+      await clearAllStorage();
       localStorage.setItem(storageVersionKey, currentVersion);
     }
   }
-
+  
   useEffect(() => {
-    checkAndUpdateVersion();
+    (async () => {
+      await checkAndUpdateVersion();
+    })();
   }, []);
 
   return <HomeTemplate events={events} />;
