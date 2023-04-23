@@ -18,6 +18,13 @@ const Home = ({ events }: Props) => {
     // Clear SessionStorage
     sessionStorage.clear();
     window.indexedDB.deleteDatabase("workbox-expiration");
+    window.indexedDB.deleteDatabase("cache-entries");
+    window.indexedDB.deleteDatabase("cacheName");
+    window.indexedDB.deleteDatabase("timestamp");
+
+
+
+
 
   }
 
