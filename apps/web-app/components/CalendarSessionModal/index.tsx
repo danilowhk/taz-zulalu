@@ -23,7 +23,7 @@ type NewSessionState = {
     location: string
     custom_location: string
     name: string
-    startDate: string
+    startDate: Date
     endTime: string
     startTime: string
     tags: string[]
@@ -55,7 +55,7 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions, event }: P
         description: "",
         name: "",
         team_members: [],
-        startDate: moment.utc().format("YYYY-MM-DD"),
+        startDate: moment().utc().toDate(),
         startTime: "",
         endTime: "",
         location: "",
@@ -116,6 +116,7 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions, event }: P
                 console.log("DB response: ", createEventDB)
             }
         } catch (error) {
+            console.log("Error creating session", error)
             toast.error("Failed to create an event", {
                 position: "top-center",
                 autoClose: 3000,
@@ -128,7 +129,7 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions, event }: P
             })
         }
 
-        // router.reload()
+        router.reload()
 
         // CLEAN EVERYTHING AFTER CREATING EVENT
         setIsLoading(false)
@@ -137,7 +138,7 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions, event }: P
             description: "",
             name: "",
             team_members: [],
-            startDate: moment.utc().format("YYYY-MM-DD"),
+            startDate: moment().utc().toDate(),
             startTime: "00",
             endTime: "00",
             location: "Amphitheater",
