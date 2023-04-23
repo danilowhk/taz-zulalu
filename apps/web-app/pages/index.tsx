@@ -40,8 +40,6 @@ const Home = ({ events }: Props) => {
     deleteAllIndexedDB();
 
   }
-
-
   
 
   function checkAndUpdateVersion() {
