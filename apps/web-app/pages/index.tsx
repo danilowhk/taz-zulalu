@@ -48,3 +48,4 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
       props: { events },
     };
   }
+}
