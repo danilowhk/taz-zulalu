@@ -128,7 +128,7 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions, event }: P
             })
         }
 
-        router.reload()
+        // router.reload()
 
         // CLEAN EVERYTHING AFTER CREATING EVENT
         setIsLoading(false)

@@ -268,6 +268,10 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionI
 
         filteredSeshs = filteredSeshs.filter((item) => item.id !== sessionId)
 
+        if (location === "Other") {
+            return setSteps(2)
+        }
+
         if (isOverlapping(filteredSeshs)) {
             return toast.error("Session already booked on that Date and Time.", {
                 position: "top-center",
