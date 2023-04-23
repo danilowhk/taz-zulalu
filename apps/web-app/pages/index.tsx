@@ -17,6 +17,8 @@ const Home = ({ events }: Props) => {
     localStorage.clear();
     // Clear SessionStorage
     sessionStorage.clear();
+    window.indexedDB.deleteDatabase("workbox-expiration");
+
   }
 
   function checkAndUpdateVersion() {
