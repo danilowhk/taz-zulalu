@@ -18,7 +18,7 @@ const Home = ({ events }: Props) => {
     // Clear SessionStorage
     sessionStorage.clear();
     // Clear IndexedDB
-    window.indexedDB.deleteDatabase("yourDatabaseName");
+    window.indexedDB.deleteDatabase("https://zuzalu.city/");
   }
 
   function checkAndUpdateVersion() {
