@@ -4,6 +4,7 @@ import { IoMdArrowBack } from "react-icons/io"
 import { Parser } from "html-to-react"
 
 import Loading from "../Loading"
+import { displayDateWithoutTimezone } from "../../data/dateFormat"
 
 type NewSessionState = {
     description: string
@@ -18,7 +19,7 @@ type NewSessionState = {
     location: string
     custom_location: string
     name: string
-    startDate: string
+    startDate: Date
     endTime: string
     startTime: string
     tags: string[]

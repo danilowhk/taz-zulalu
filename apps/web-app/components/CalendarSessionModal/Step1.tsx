@@ -30,7 +30,7 @@ type NewSessionState = {
     location: string
     custom_location: string
     name: string
-    startDate: string
+    startDate: Date
     endTime: string
     startTime: string
     tags: string[]
@@ -360,10 +360,9 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
                     <label className="font-[600]">Date*</label>
                     <DatePicker
                         className="border-[#C3D0CF] border-2 p-1 rounded-[8px] h-[42px] w-full"
-                        selected={new Date(startDate)}
+                        selected={startDate}
                         onChange={(e: any) => {
-                            const newDate = moment.utc(e).format("YYYY-MM-DD")
-                            setNewSession({ ...newSession, startDate: newDate })
+                            setNewSession({ ...newSession, startDate: e })
                         }}
                         minDate={moment().toDate()}
                     />
