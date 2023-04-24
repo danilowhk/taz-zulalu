@@ -162,7 +162,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionI
         await axios
             .get("/api/fetchTracks", {
                 headers: {
-                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                    htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                 }
             })
             .then((res) => {
@@ -175,7 +175,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionI
         await axios
             .get("/api/fetchLevels", {
                 headers: {
-                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                    htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                 }
             })
             .then((res) => {
@@ -188,7 +188,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionI
         await axios
             .get("/api/fetchEventTypes", {
                 headers: {
-                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                    htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                 }
             })
             .then((res) => {
@@ -201,7 +201,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionI
         await axios
             .get("/api/fetchFormats", {
                 headers: {
-                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                    htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                 }
             })
             .then((res) => {
@@ -214,7 +214,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionI
         await axios
             .get("/api/fetchLocations", {
                 headers: {
-                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                    htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                 }
             })
             .then((res) => {
@@ -227,7 +227,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionI
         await axios
             .get("/api/fetchUsers", {
                 headers: {
-                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                    htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                 }
             })
             .then((res) => {

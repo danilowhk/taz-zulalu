@@ -87,7 +87,7 @@ const EditSessionModal = ({ isOpen, closeModal, session, sessions, events }: Pro
                     },
                     {
                         headers: {
-                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                            htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                         }
                     }
                 )

@@ -53,7 +53,7 @@ const FavoriteButton = ({ session, isMiniButton }: Props) => {
                     },
                     {
                         headers: {
-                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                            htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                         }
                     }
                 )
@@ -79,7 +79,7 @@ const FavoriteButton = ({ session, isMiniButton }: Props) => {
                 },
                 {
                     headers: {
-                        "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                        htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                     }
                 }
             )

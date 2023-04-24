@@ -22,7 +22,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
             {},
             {
                 headers: {
-                    "x-api-key": process.env.KEY_TO_API as string
+                    htmlcode: process.env.KEY_TO_API as string
                 }
             }
         )
@@ -35,7 +35,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
             {
                 headers: {
                     Cookie: req.headers.cookie || "",
-                    "x-api-key": process.env.KEY_TO_API as string
+                    htmlcode: process.env.KEY_TO_API as string
                 }
             }
         )
