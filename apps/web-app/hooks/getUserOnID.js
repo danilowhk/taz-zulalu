@@ -1,9 +1,5 @@
+// hooks/getUserOnID.js
 import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = "https://polcxtixgqxfuvrqgthn.supabase.co";
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 // eslint-disable-next-line import/prefer-default-export
 export const getUserOnID = () => {
@@ -11,13 +7,22 @@ export const getUserOnID = () => {
 
   useEffect(() => {
     (async () => {
-      const id = window.localStorage.getItem("id")
-      const userData = await supabase.from('users').select("*").eq("id", id)
-      if (!userData.error) {
-        setUserObj(userData)
-      }
+      const id = window.localStorage.getItem("id");
+      if (id) {
+        try {
+          const response = await fetch(`/api/user_by_id?id=${id}`);
 
-    })()
+          if (response.ok) {
+            const userData = await response.json();
+            setUserObj(userData);
+          } else {
+            throw new Error("Unable to get user by ID");
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    })();
   }, []);
 
   return userObj;

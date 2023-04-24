@@ -15,6 +15,6 @@
         "jsx": "preserve",
         "incremental": true
     },
-    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "pages/canvas.js"],
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "pages/canvas.js", "pages/api/user_by_id.jsx"],
     "exclude": ["node_modules"]
 }

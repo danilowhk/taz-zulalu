@@ -27,7 +27,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             description: "The user does not have an active session or is not authenticated"
         })
     }
-
     // If the origin is in the list of allowed origins, set the appropriate CORS headers
     if (typeof origin === "string" && allowedOrigins.includes(origin)) {
         res.setHeader("Access-Control-Allow-Origin", origin)
