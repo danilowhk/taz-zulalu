@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
+import authMiddleware from "../../hooks/auth"
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const supabase = createServerSupabaseClient({ req, res })
@@ -43,7 +44,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             quota_id
         } = req.body
 
-        const response = await supabase
+        const updateSB = await supabase
             .from("sessions")
             .update({
                 name,
@@ -71,7 +72,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 custom_location
             })
             .eq("id", id)
-        console.log("Response: ", response)
+
+        console.log("updateSB", updateSB)
 
         res.status(201).json("Event Updated")
     } catch (err: any) {
@@ -79,3 +81,5 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         res.status(500).json({ statusCode: 500, message: err })
     }
 }
+
+export default authMiddleware(handler)

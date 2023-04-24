@@ -78,46 +78,8 @@ const EditSessionModal = ({ isOpen, closeModal, session, sessions, events }: Pro
         setIsLoading(true)
 
         try {
-            if (newSession.hasTicket) {
-                console.log("has ticket and subevent id")
-                // Step 1 Update SubEvent
-
-                const subEventRes = await axios.post(
-                    `/api/pretix-update-subevent`,
-                    {
-                        name: newSession.name,
-                        startDate: newSession.startDate,
-                        slug: session.event_slug,
-                        subEventId: session.subevent_id
-                    },
-                    {
-                        headers: {
-                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
-                        }
-                    }
-                )
-
-                console.log("Updated subEvent response: ", subEventRes.data)
-
-                // Step 2 Update Quota for the subEvent
-
-                const quotaUpdatedRes = await axios.post(
-                    `/api/pretix-update-quota/`,
-                    {
-                        ticketAmount: amountTickets,
-                        slug: session.event_slug,
-                        quotaId: session.quota_id
-                    },
-                    {
-                        headers: {
-                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
-                        }
-                    }
-                )
-                console.log("Quota updated: ", quotaUpdatedRes.data)
-
-                // Step 3 Update database
-                const updateSessionDB = await axios.post(
+            await axios
+                .post(
                     "/api/updateSession",
                     {
                         ...newSession,
@@ -129,24 +91,14 @@ const EditSessionModal = ({ isOpen, closeModal, session, sessions, events }: Pro
                         }
                     }
                 )
-            } else {
-                console.log("only DB update")
-                const updateSessionDB = await axios.post(
-                    "/api/updateSession",
-                    {
-                        ...newSession,
-                        id: session.id
-                    },
-                    {
-                        headers: {
-                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
-                        }
-                    }
-                )
-                console.log("DB response: ", updateSessionDB)
-            }
+                .then((res) => {
+                    console.log("UPDATE RES", res)
+                })
+                .catch((res) => {
+                    console.log("ERROR RES", res)
+                })
         } catch (error) {
-            toast.error("Failed to create an event", {
+            return toast.error("Failed to create an event", {
                 position: "top-center",
                 autoClose: 3000,
                 hideProgressBar: false,
