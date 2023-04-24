@@ -8,7 +8,7 @@ const supabase = createClient(supabaseUrl, supabaseKey as string)
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
-        const response = await supabase.from("users").select("*")
+        const response = await supabase.from("users").select("userName")
         if (response.error === null) res.status(200).send(response.data)
         else res.status(response.status).send(response.error)
     } catch (err: any) {

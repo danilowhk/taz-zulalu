@@ -21,7 +21,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
             {},
             {
                 headers: {
-                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                    htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                 }
             }
         )

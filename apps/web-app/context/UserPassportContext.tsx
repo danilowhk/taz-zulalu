@@ -73,12 +73,11 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
         try {
             await axios({
                 method: "post",
-                url: "https://6750-62-4-33-200.ngrok-free.app/api/passport-user-login/",
+                url: "https://zuzalu.city/api/passport-user-login/",
                 data: { participant1, pcdStr },
                 headers: {
                     "Content-Type": "application/json",
-                    "x-api-key": process.env.KEY_TO_API as string,
-                    "x-api-type": "/api/passport-user-login/"
+                    htmlcode: process.env.KEY_TO_API as string
                 }
             })
                 .then((response) => {

@@ -35,7 +35,7 @@ const SessionPage = ({ session, sessions, userId, events }: Props) => {
             { id: session.id },
             {
                 headers: {
-                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                    htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                 }
             }
         )
@@ -49,7 +49,7 @@ const SessionPage = ({ session, sessions, userId, events }: Props) => {
                     },
                     {
                         headers: {
-                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                            htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                         }
                     }
                 )
@@ -62,7 +62,7 @@ const SessionPage = ({ session, sessions, userId, events }: Props) => {
                     },
                     {
                         headers: {
-                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                            htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                         }
                     }
                 )

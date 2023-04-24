@@ -64,7 +64,7 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions, event }: P
                 },
                 {
                     headers: {
-                        "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                        htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                     }
                 }
             )

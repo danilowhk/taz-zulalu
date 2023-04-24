@@ -1,7 +1,6 @@
 import { createContext, ReactNode, useState, useContext, useEffect, useMemo } from "react"
 import axios from "axios"
 
-import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import { SessionsDTO, UserDTO } from "../types"
 
 import { KEY_TO_API } from "../hooks/env"
@@ -32,44 +31,37 @@ export function UserAuthenticationProvider({ children }: UserAuthenticationProvi
     const isAuth = useMemo(() => Boolean(userInfo), [userInfo])
 
     const fetchUser = async () => {
+        const supaBaseSessionVerify = await axios.post(
+            "/api/apiSupabaseSession",
+            {},
+            {
+                headers: {
+                    htmlcode: `${KEY_TO_API}`
+                    // Pass cookies from the incoming request
+                }
+            }
+        )
+
+        if (supaBaseSessionVerify.status !== 201) return setErrorAuth(true)
+
         await axios
             .post(
-                "/api/apiSupabaseSession",
+                `/api/fetchUser/${supaBaseSessionVerify.data.session.user.id!}/`,
                 {},
                 {
                     headers: {
-                        "x-api-key": `${KEY_TO_API}`
+                        htmlcode: `${KEY_TO_API}`
                         // Pass cookies from the incoming request
                     }
                 }
             )
-            .then(async (responsee) => {
-                if (responsee.data.user.id) {
-                    const userId = `${window.location.origin}/api/fetchUser/${responsee.data.user.id!}/`
-                    await axios
-                        .post(
-                            userId,
-                            {},
-                            {
-                                headers: {
-                                    "x-api-key": `${KEY_TO_API}`
-                                    // Pass cookies from the incoming request
-                                }
-                            }
-                        )
-                        .then((res) => {
-                            setUserRole(res.data.role)
-                            setUserInfo(res.data)
-                        })
-                        .catch((error) => {
-                            console.log("USER AUTH CONTEXT FAILED TO FETCH USER ID", error)
-                        })
-                } else {
-                    setErrorAuth(true)
-                    console.log("USER AUTH CONTEXT FAILED TO FETCH USER ID")
-                }
+            .then((res) => {
+                setUserRole(res.data.role)
+                setUserInfo(res.data)
             })
-            .catch((err) => setUserInfo(undefined))
+            .catch((error) => {
+                console.log("USER AUTH CONTEXT FAILED TO FETCH USER ID", error)
+            })
     }
 
     const fetchEvents = async () => {
@@ -80,7 +72,7 @@ export function UserAuthenticationProvider({ children }: UserAuthenticationProvi
                 data: {},
                 headers: {
                     "Content-Type": "application/json",
-                    "x-api-key": `${KEY_TO_API}`,
+                    htmlcode: `${KEY_TO_API}`,
                     "x-api-type": "fetchSessionsByUserId"
                 }
             })
