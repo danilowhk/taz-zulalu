@@ -37,7 +37,7 @@ const EventDetails = ({ event, participants, favoritedEvents, setUpdateEventModa
                     },
                     {
                         headers: {
-                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                            htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                         }
                     }
                 )
@@ -79,7 +79,7 @@ const EventDetails = ({ event, participants, favoritedEvents, setUpdateEventModa
                     },
                     {
                         headers: {
-                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                            htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                         }
                     }
                 )
@@ -124,7 +124,7 @@ const EventDetails = ({ event, participants, favoritedEvents, setUpdateEventModa
                     },
                     {
                         headers: {
-                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                            htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                         }
                     }
                 )
@@ -166,7 +166,7 @@ const EventDetails = ({ event, participants, favoritedEvents, setUpdateEventModa
                     },
                     {
                         headers: {
-                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                            htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                         }
                     }
                 )

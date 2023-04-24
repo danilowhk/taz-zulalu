@@ -18,7 +18,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
 
         const response = await axios.get(`${url}/api/fetchOverview`, {
             headers: {
-                "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
             }
         })
 

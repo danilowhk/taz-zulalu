@@ -25,7 +25,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
             {},
             {
                 headers: {
-                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                    htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
                 }
             }
         )
@@ -35,7 +35,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
         const responseSession = await axios.get(`${url}/api/fetchSession/${query.sessionId}`, {
             headers: {
                 Cookie: req.headers.cookie || "", // Pass cookies from the incoming request
-                "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
             }
         })
 
@@ -43,7 +43,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
         const responseSessions = await axios.get(`${url}/api/fetchSessions`, {
             headers: {
                 Cookie: req.headers.cookie || "", // Pass cookies from the incoming request
-                "x-api-key": process.env.KEY_TO_API as string
+                htmlcode: process.env.KEY_TO_API as string
             }
         })
 

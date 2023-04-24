@@ -149,7 +149,7 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
         await axios
             .get("/api/fetchTracks", {
                 headers: {
-                    "x-api-key": process.env.KEY_TO_API as string
+                    htmlcode: process.env.KEY_TO_API as string
                 }
             })
             .then((res) => {
@@ -165,7 +165,7 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
         await axios
             .get("/api/fetchLevels", {
                 headers: {
-                    "x-api-key": process.env.KEY_TO_API as string
+                    htmlcode: process.env.KEY_TO_API as string
                 }
             })
             .then((res) => {
@@ -178,7 +178,7 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
         await axios
             .get("/api/fetchEventTypes", {
                 headers: {
-                    "x-api-key": process.env.KEY_TO_API as string
+                    htmlcode: process.env.KEY_TO_API as string
                 }
             })
             .then((res) => {
@@ -191,7 +191,7 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
         await axios
             .get("/api/fetchFormats", {
                 headers: {
-                    "x-api-key": process.env.KEY_TO_API as string
+                    htmlcode: process.env.KEY_TO_API as string
                 }
             })
             .then((res) => {
@@ -204,7 +204,7 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
         await axios
             .get("/api/fetchLocations", {
                 headers: {
-                    "x-api-key": process.env.KEY_TO_API as string,
+                    htmlcode: process.env.KEY_TO_API as string,
                     "x-api-type": "fetchLocations"
                 }
             })
@@ -218,7 +218,7 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
         await axios
             .get("/api/fetchUsers", {
                 headers: {
-                    "x-api-key": process.env.KEY_TO_API as string
+                    htmlcode: process.env.KEY_TO_API as string
                 }
             })
             .then((res) => {
