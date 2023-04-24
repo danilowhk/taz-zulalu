@@ -11,7 +11,7 @@ type Props = {
 }
 
 const Home = ({ events }: Props) => {
-    const currentVersion = "1.2.0"
+    const currentVersion = "1.3.0"
     const storageVersionKey = "myAppVersion"
 
     async function deleteAllCacheStorage() {

@@ -44,7 +44,6 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
         // requestProofFromPassport(proofUrl)
     }
 
-    // // Listen for PCDs coming back from the Passport popup
     useEffect(() => {
         async function receiveMessage(ev: MessageEvent<any>) {
             if (!ev.data.encodedPcd) return
@@ -54,7 +53,6 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
         window.addEventListener("message", receiveMessage, false)
     }, [])
 
-    // Request a Zuzalu UUID-revealing proof from Passport
     const [signatureProofValid, setSignatureProofValid] = useState<boolean | undefined>()
     const onProofVerified = (valid: boolean) => {
         setSignatureProofValid(valid)
@@ -62,7 +60,6 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
 
     const { signatureProof } = useSemaphoreSignatureProof(pcdStr, onProofVerified)
 
-    // Extract UUID, the signed message of the returned PCD
     useEffect(() => {
         if (signatureProofValid && signatureProof) {
             const userUuid = signatureProof.claim.signedMessage
@@ -70,15 +67,14 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
         }
     }, [signatureProofValid, signatureProof])
 
-    // Finally, once we have the UUID, fetch the participant data from Passport.
     const { participant } = useFetchParticipant(PASSPORT_SERVER_URL, uuid)
 
     const loginProof = async (participant1: any, signatureProofProps: any) => {
         try {
             await axios({
                 method: "post",
-                url: "https://zuzalu.city/api/passport-user-login/",
-                data: { participant1, signatureProofProps },
+                url: "https://6750-62-4-33-200.ngrok-free.app/api/passport-user-login/",
+                data: { participant1, pcdStr },
                 headers: {
                     "Content-Type": "application/json",
                     "x-api-key": process.env.KEY_TO_API as string,
