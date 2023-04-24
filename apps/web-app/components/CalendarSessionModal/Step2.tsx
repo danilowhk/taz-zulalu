@@ -4,33 +4,7 @@ import { IoMdArrowBack } from "react-icons/io"
 import { Parser } from "html-to-react"
 
 import Loading from "../Loading"
-import { displayDateWithoutTimezone } from "../../data/dateFormat"
-
-type NewSessionState = {
-    description: string
-    equipment: string
-    event_id: number
-    event_type: string
-    maxRsvp: string
-    format: string
-    hasTicket: boolean
-    info: string
-    level: string
-    location: string
-    custom_location: string
-    name: string
-    startDate: Date
-    endTime: string
-    startTime: string
-    tags: string[]
-    team_members: {
-        name: string
-        role: string
-    }[]
-    track: string
-    event_slug: string
-    event_item_id: number
-}
+import { NewSessionState } from "../../types"
 
 type Props = {
     setSteps: (step: number) => void

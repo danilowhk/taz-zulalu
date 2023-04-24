@@ -129,3 +129,29 @@ export interface LocationDTO {
     location: string
     created_at: Date
 }
+
+export interface NewSessionState {
+    description: string
+    event_id: number
+    event_type: string
+    maxRsvp: string
+    format: string
+    hasTicket: boolean
+    equipment: string
+    info: string
+    level: string
+    location: string
+    custom_location: string
+    name: string
+    startDate: Date
+    endTime: string
+    startTime: string
+    tags: string[]
+    team_members: {
+        name: string
+        role: string
+    }[]
+    track: string
+    event_slug: string
+    event_item_id: number
+}
