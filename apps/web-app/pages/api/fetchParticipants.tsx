@@ -9,9 +9,9 @@ const allowedOrigins = ["https://zuzalu.city"]
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     // Check for the 'Origin' header in the request
-    const {origin} = req.headers;
+    const { origin } = req.headers
 
-    if (origin !== allowedOrigins[0]){
+    if (origin !== allowedOrigins[0]) {
         res.status(403).json({ message: "Forbidden" })
         return
     }
@@ -26,7 +26,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             description: "The user does not have an active session or is not authenticated"
         })
     }
-    
     // If the origin is in the list of allowed origins, set the appropriate CORS headers
     if (typeof origin === "string" && allowedOrigins.includes(origin)) {
         res.setHeader("Access-Control-Allow-Origin", origin)

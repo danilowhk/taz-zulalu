@@ -30,18 +30,42 @@ const SessionPage = ({ session, sessions, userId, events }: Props) => {
     const [openEditSessionModal, setOpenEditSessionModal] = useState(false)
 
     const deleteSession = async () => {
-        await axios.post("/api/deleteSession", { id: session.id })
+        await axios.post(
+            "/api/deleteSession",
+            { id: session.id },
+            {
+                headers: {
+                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                }
+            }
+        )
         if (session.hasTicket) {
             try {
-                await axios.post("/api/pretix-delete-subevent", {
-                    slug: session.event_slug,
-                    subEventId: session.subevent_id
-                })
+                await axios.post(
+                    "/api/pretix-delete-subevent",
+                    {
+                        slug: session.event_slug,
+                        subEventId: session.subevent_id
+                    },
+                    {
+                        headers: {
+                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                        }
+                    }
+                )
             } catch (error) {
-                await axios.post("/api/pretix-deactivate-subevent", {
-                    slug: session.event_slug,
-                    subEventId: session.subevent_id
-                })
+                await axios.post(
+                    "/api/pretix-deactivate-subevent",
+                    {
+                        slug: session.event_slug,
+                        subEventId: session.subevent_id
+                    },
+                    {
+                        headers: {
+                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                        }
+                    }
+                )
                 router.push("/")
             }
         }

@@ -45,10 +45,18 @@ const FavoriteButton = ({ session, isMiniButton }: Props) => {
     const handleAddFavorite = async () => {
         if (userInfo) {
             await axios
-                .post("/api/addFavoriteSession", {
-                    session_id: session.id,
-                    user_id: userInfo.id
-                })
+                .post(
+                    "/api/addFavoriteSession",
+                    {
+                        session_id: session.id,
+                        user_id: userInfo.id
+                    },
+                    {
+                        headers: {
+                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                        }
+                    }
+                )
                 .then((res) => {
                     if (res.status === 201) {
                         setLatestFavoritedSessionId(res.data.favoritedSession.id)
@@ -64,9 +72,17 @@ const FavoriteButton = ({ session, isMiniButton }: Props) => {
 
     const handleRemoveFavorite = async () => {
         await axios
-            .post("/api/removeFavoriteSession", {
-                id: latestFavoritedSessionId
-            })
+            .post(
+                "/api/removeFavoriteSession",
+                {
+                    id: latestFavoritedSessionId
+                },
+                {
+                    headers: {
+                        "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                    }
+                }
+            )
             .then((res) => {
                 if (res.status === 200) {
                     setLatestFavoritedSessionId(null)
