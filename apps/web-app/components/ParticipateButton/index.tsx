@@ -46,10 +46,18 @@ const ParticipateButton = ({ session, isTallButton }: Props) => {
     const handleClickAttend = async (sessionId: number) => {
         if (userInfo) {
             await axios
-                .post("/api/addParticipant", {
-                    session_id: sessionId,
-                    user_id: userInfo.id
-                })
+                .post(
+                    "/api/addParticipant",
+                    {
+                        session_id: sessionId,
+                        user_id: userInfo.id
+                    },
+                    {
+                        headers: {
+                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                        }
+                    }
+                )
                 .then((res) => {
                     if (res.data === "Participant added") {
                         makeToast(true, "You are now attending this event.")
@@ -65,13 +73,21 @@ const ParticipateButton = ({ session, isTallButton }: Props) => {
 
     const handleBuyTicket = async () => {
         await axios
-            .post("/api/pretix-create-order", {
-                subEventId: session.subevent_id,
-                slug: session.event_slug,
-                itemId: session.event_item_id,
-                name: session.name,
-                session_id: session.id
-            })
+            .post(
+                "/api/pretix-create-order",
+                {
+                    subEventId: session.subevent_id,
+                    slug: session.event_slug,
+                    itemId: session.event_item_id,
+                    name: session.name,
+                    session_id: session.id
+                },
+                {
+                    headers: {
+                        "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                    }
+                }
+            )
             .then(() => handleClickAttend(session.id))
             .then(() => router.reload())
     }

@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
+import authMiddleware from "../../hooks/auth"
 
 interface Identity {
     participant1: {
@@ -23,7 +24,7 @@ interface Identity {
     }
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const supabase = createServerSupabaseClient({ req, res })
     const signInWithSemaphoreProof = async (identity: Identity) => {
         // Validate Proof of user before interacting with DB
@@ -136,3 +137,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(400).json("Request body is empty.")
     }
 }
+
+export default authMiddleware(handler)

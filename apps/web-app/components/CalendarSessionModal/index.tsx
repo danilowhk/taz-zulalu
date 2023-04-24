@@ -83,36 +83,68 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions, event }: P
             if (newSession.hasTicket) {
                 // Step 1 Create SubEvent
 
-                const subEventRes = await axios.post(`/api/pretix-create-subevent`, {
-                    name: newSession.name,
-                    startDate: newSession.startDate,
-                    slug: newSession.event_slug,
-                    itemId: newSession.event_item_id
-                })
+                const subEventRes = await axios.post(
+                    `/api/pretix-create-subevent`,
+                    {
+                        name: newSession.name,
+                        startDate: newSession.startDate,
+                        slug: newSession.event_slug,
+                        itemId: newSession.event_item_id
+                    },
+                    {
+                        headers: {
+                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                        }
+                    }
+                )
 
                 console.log("Created subEvent response: ", subEventRes.data)
 
                 // // Step 3 Create Quota for the subEvent
 
-                const quotaCreatedRes = await axios.post(`/api/pretix-create-quota/`, {
-                    ticketAmount: amountTickets,
-                    subEventId: subEventRes.data.id,
-                    slug: newSession.event_slug,
-                    itemId: newSession.event_item_id
-                })
+                const quotaCreatedRes = await axios.post(
+                    `/api/pretix-create-quota/`,
+                    {
+                        ticketAmount: amountTickets,
+                        subEventId: subEventRes.data.id,
+                        slug: newSession.event_slug,
+                        itemId: newSession.event_item_id
+                    },
+                    {
+                        headers: {
+                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                        }
+                    }
+                )
 
                 console.log("Quota creatd: ", quotaCreatedRes.data)
                 // Step 5 Add to database
-                const createEventDB = await axios.post("/api/createSession", {
-                    ...newSession,
-                    subEventId: subEventRes.data.id,
-                    quota_id: quotaCreatedRes.data.id
-                })
+                const createEventDB = await axios.post(
+                    "/api/createSession",
+                    {
+                        ...newSession,
+                        subEventId: subEventRes.data.id,
+                        quota_id: quotaCreatedRes.data.id
+                    },
+                    {
+                        headers: {
+                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                        }
+                    }
+                )
                 console.log("DB response: ", createEventDB)
             } else {
-                const createEventDB = await axios.post("/api/createSession", {
-                    ...newSession
-                })
+                const createEventDB = await axios.post(
+                    "/api/createSession",
+                    {
+                        ...newSession
+                    },
+                    {
+                        headers: {
+                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                        }
+                    }
+                )
                 console.log("DB response: ", createEventDB)
             }
         } catch (error) {

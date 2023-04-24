@@ -4,10 +4,20 @@ interface TimeDropdownProps {
     id: string
     value: string
     onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void
+    minTime?: string
 }
 
-const TimeDropdown: React.FC<TimeDropdownProps> = ({ id, value, onChange }) => {
+const TimeDropdown: React.FC<TimeDropdownProps> = ({ id, value, onChange, minTime = "00:00" }) => {
     const times = []
+
+    const to12HourFormat = (time: string) => {
+        const [hour, minute] = time.split(":")
+        const hourInt = parseInt(hour)
+        const amPm = hourInt >= 12 ? "PM" : "AM"
+        const hour12 = hourInt % 12 === 0 ? 12 : hourInt % 12
+        const hourString = hour12 < 10 ? `0${hour12}` : hour12
+        return `${hourString}:${minute} ${amPm}`
+    }
 
     for (let i = 0; i < 24; i++) {
         for (let j = 0; j < 4; j++) {
@@ -17,6 +27,8 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ id, value, onChange }) => {
             times.push(`${hour}:${minuteString}`)
         }
     }
+
+    const filteredTimes = times.filter((time) => time > minTime).map(to12HourFormat)
 
     return (
         <select
@@ -28,7 +40,7 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ id, value, onChange }) => {
             <option value="" disabled>
                 Please Select
             </option>
-            {times.map((time, index) => (
+            {filteredTimes.map((time, index) => (
                 <option key={index} value={time}>
                     {time}
                 </option>

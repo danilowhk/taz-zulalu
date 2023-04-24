@@ -1,7 +1,9 @@
 // pages/api/create-event.js
 import axios from "axios"
+import { NextApiRequest, NextApiResponse } from "next"
+import authMiddleware from "../../hooks/auth"
 
-export default async function handler(req, res) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const auth = process.env.NEXT_PUBLIC_PRETIX_API
     const headers = {
         Accept: "application/json, text/javascript",
@@ -49,10 +51,12 @@ export default async function handler(req, res) {
         if (response.status === 201) {
             res.status(200).json(response.data)
         } else {
-            throw new Error(`HTTP error! status: ${response.error}`)
+            throw new Error(`HTTP error! status: ${response.statusText}`)
         }
     } catch (error) {
         console.log("Error: ", error)
         res.status(500).json({ message: error })
     }
 }
+
+export default authMiddleware(handler)

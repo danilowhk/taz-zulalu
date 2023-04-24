@@ -18,7 +18,7 @@ type Props = {
 
 const CalendarPage = ({ sessions, events }: Props) => {
     const localtionRef = useRef(null)
-    const { userRole, userInfo } = useUserAuthenticationContext()
+    const { userInfo } = useUserAuthenticationContext()
 
     const [openAddSessionModal, setOpenAddSessionModal] = useState(false)
     const [openAddTicketsModal, setOpenAddTicketsModal] = useState(false)

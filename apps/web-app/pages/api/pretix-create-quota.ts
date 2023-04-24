@@ -1,7 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import axios from "axios"
+import authMiddleware from "../../hooks/auth"
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     console.log("Create Quota Triggered", req.query.slug, req.body)
     const auth = process.env.NEXT_PUBLIC_PRETIX_API
     const headers = {
@@ -41,3 +42,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(500).json({ message: "Internal server error" })
     }
 }
+
+export default authMiddleware(handler)
