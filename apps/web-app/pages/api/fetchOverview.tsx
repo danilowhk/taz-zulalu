@@ -1,8 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import { DateTime } from "luxon"
+import authMiddleware from "../../hooks/auth"
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const supabase = createServerSupabaseClient({ req, res })
 
     try {
@@ -22,3 +23,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(500).json({ statusCode: 500, message: err })
     }
 }
+
+export default authMiddleware(handler)

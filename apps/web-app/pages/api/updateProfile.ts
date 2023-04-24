@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
+import authMiddleware from "../../hooks/auth"
 // import fetch from "node-fetch"
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -39,3 +40,5 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         }
     }
 }
+
+export default authMiddleware(handler)
