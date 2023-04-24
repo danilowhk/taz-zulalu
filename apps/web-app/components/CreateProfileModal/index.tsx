@@ -18,7 +18,18 @@ const CreateProfileModal = ({ isOpen, closeModal, reRender, setRerender }: Props
 
     const handleSubmit = async () => {
         setIsLoading(true)
-        await axios.post("/api/createProfile", profile)
+        await axios.post(
+            "/api/createProfile",
+            {
+                profile
+            },
+
+            {
+                headers: {
+                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                }
+            }
+        )
         setIsLoading(false)
         setRerender(!reRender)
         closeModal(false)

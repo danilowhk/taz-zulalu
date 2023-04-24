@@ -4,6 +4,10 @@ import axios from "axios"
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import { SessionsDTO, UserDTO } from "../types"
 
+import { KEY_TO_API } from "../hooks/env"
+
+console.log("Key: ", KEY_TO_API)
+
 type UserAuthenticationContextData = {
     userInfo: UserDTO | undefined
     setUserInfo: (b: UserDTO) => void
@@ -31,6 +35,9 @@ export function UserAuthenticationProvider({ children }: UserAuthenticationProvi
 
     const supabase = createBrowserSupabaseClient()
 
+    // const keyToApi = process.env.KEY_TO_API as string
+    // console.log("CONTEXT API", keyToApi)
+
     const fetchUser = async () => {
         const {
             data: { session }
@@ -42,9 +49,19 @@ export function UserAuthenticationProvider({ children }: UserAuthenticationProvi
 
         if (session.user.id) {
             const userId = `${window.location.origin}/api/fetchUser/${session.user.id!}/`
-
+            console.log("KEY_TO_API1", KEY_TO_API)
             await axios
-                .get(userId)
+                .post(
+                    userId,
+                    {},
+                    {
+                        headers: {
+                            "x-api-key": `${KEY_TO_API}`,
+                            "x-api-type": "API fetchUser"
+                            // Pass cookies from the incoming request
+                        }
+                    }
+                )
                 .then((res) => {
                     setUserRole(res.data.role)
                     setUserInfo(res.data)
@@ -60,8 +77,18 @@ export function UserAuthenticationProvider({ children }: UserAuthenticationProvi
 
     const fetchEvents = async () => {
         if (userInfo) {
-            await axios
-                .get(`/api/fetchSessionsByUserId/${userInfo.id}`)
+            console.log("KEY_TO_API2", KEY_TO_API)
+
+            await axios({
+                method: "post",
+                url: `/api/fetchSessionsByUserId/${userInfo.id}`,
+                data: {},
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-api-key": `${KEY_TO_API}`,
+                    "x-api-type": "fetchSessionsByUserId"
+                }
+            })
                 .then((res) => {
                     const sessionsParticipanting = res.data.filter((item: any) => item.participants.length > 0)
                     const sessionsFavorited = res.data.filter((item: any) => item.favoritedSessions.length > 0)
@@ -75,6 +102,8 @@ export function UserAuthenticationProvider({ children }: UserAuthenticationProvi
     }
 
     useEffect(() => {
+        console.log("KEY_TO_API1 USEEFFCT", KEY_TO_API)
+
         fetchUser()
     }, [])
 

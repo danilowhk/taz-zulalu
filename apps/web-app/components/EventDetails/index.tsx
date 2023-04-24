@@ -30,9 +30,17 @@ const EventDetails = ({ event, participants, favoritedEvents, setUpdateEventModa
     const handleClickAttend = async () => {
         if (checkIfUserHaveAttended) {
             await axios
-                .post("/api/removeParticipant", {
-                    id: checkIfUserHaveAttended.id
-                })
+                .post(
+                    "/api/removeParticipant",
+                    {
+                        id: checkIfUserHaveAttended.id
+                    },
+                    {
+                        headers: {
+                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                        }
+                    }
+                )
                 .then((res) => {
                     if (res.status === 200) {
                         toast.success("You are now not attending to this event anymore.", {
@@ -63,10 +71,18 @@ const EventDetails = ({ event, participants, favoritedEvents, setUpdateEventModa
                 })
         } else {
             await axios
-                .post("/api/addParticipant", {
-                    event_id: event.id,
-                    user_id: 1
-                })
+                .post(
+                    "/api/addParticipant",
+                    {
+                        event_id: event.id,
+                        user_id: 1
+                    },
+                    {
+                        headers: {
+                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                        }
+                    }
+                )
                 .then((res) => {
                     if (res.data === "Participant added") {
                         toast.success("You are now attending to this event.", {
@@ -101,9 +117,17 @@ const EventDetails = ({ event, participants, favoritedEvents, setUpdateEventModa
     const handleClickFavorite = async () => {
         if (checkIfUserHadFavorited) {
             await axios
-                .post("/api/removeFavoriteEvent", {
-                    id: checkIfUserHadFavorited.id
-                })
+                .post(
+                    "/api/removeFavoriteEvent",
+                    {
+                        id: checkIfUserHadFavorited.id
+                    },
+                    {
+                        headers: {
+                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                        }
+                    }
+                )
                 .then((res) => {
                     if (res.status === 200) {
                         toast.success("This event is not anymore favorite.", {
@@ -134,10 +158,18 @@ const EventDetails = ({ event, participants, favoritedEvents, setUpdateEventModa
                 })
         } else {
             await axios
-                .post("/api/addFavoriteEvent", {
-                    event_id: event.id,
-                    user_id: 1
-                })
+                .post(
+                    "/api/addFavoriteEvent",
+                    {
+                        event_id: event.id,
+                        user_id: 1
+                    },
+                    {
+                        headers: {
+                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                        }
+                    }
+                )
                 .then((res) => {
                     if (res.data === "Event favorited") {
                         toast.success("You favorited this event.", {

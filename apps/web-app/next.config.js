@@ -26,6 +26,9 @@ module.exports = withPWA({
     experimental: {
         esmExternals: false
     },
+    env: {
+        KEY_TO_API: process.env.KEY_TO_API
+    },
     webpack(config, options) {
         if (!options.isServer) {
             config.resolve.fallback.fs = false

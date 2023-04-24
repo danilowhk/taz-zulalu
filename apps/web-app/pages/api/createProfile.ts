@@ -1,12 +1,11 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
+import authMiddleware from "../../hooks/auth"
 // import fetch from "node-fetch"
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    // Create authenticated Supabase Client
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const supabase = createServerSupabaseClient({ req, res })
 
-    //Check if we have a session
     const {
         data: { session }
     } = await supabase.auth.getSession()
@@ -22,11 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (session) {
         try {
-            const {
-                location,
-                company,
-                bio
-            } = req.body
+            const { location, company, bio } = req.body
 
             await supabase.from("user_profiles").insert({
                 location,
@@ -42,3 +37,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
     }
 }
+
+export default authMiddleware(handler)

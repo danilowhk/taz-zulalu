@@ -78,15 +78,17 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
     // Finally, once we have the UUID, fetch the participant data from Passport.
     const { participant } = useFetchParticipant(PASSPORT_SERVER_URL, uuid)
 
-    const loginProof = async (participant1: any) => {
+    const loginProof = async (participant1: any, signatureProofProps: any) => {
         console.log("participant1", participant1)
         try {
             await axios({
                 method: "post",
                 url: "https://zuzalu.city/api/passport-user-login/",
-                data: participant1,
+                data: { participant1, signatureProofProps },
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "x-api-key": process.env.KEY_TO_API as string,
+                    "x-api-type": "/api/passport-user-login/"
                 }
             })
                 .then((response) => {
@@ -121,7 +123,7 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
     useEffect(() => {
         if (participant) {
             setLoadingPassport({ step: 3, text: "Logging you in..." })
-            loginProof(participant)
+            loginProof(participant, signatureProof)
         }
     }, [participant])
 

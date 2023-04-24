@@ -1,21 +1,38 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
+import authMiddleware from "../../hooks/auth"
 
 interface Identity {
-    uuid: string
-    commitment: string
-    email: string
-    name: string
-    role: string
-    residence: string
-    order_id: string
+    participant1: {
+        uuid: string
+        commitment: string
+        email: string
+        name: string
+        role: string
+        residence: string
+        order_id: string
+    }
+    signatureProofProps: {
+        type: string
+        id: string
+        claim: {
+            identityCommitment: string
+            signedMessage: string
+            nullifierHash: string
+        }
+        proof: string[]
+    }
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const supabase = createServerSupabaseClient({ req, res })
     const signInWithSemaphoreProof = async (identity: Identity) => {
         // Validate Proof of user before interacting with DB
-        const { uuid, commitment, email, name, role, residence, order_id } = identity
+        const {
+            participant1: { uuid, commitment, email, name, role, residence, order_id },
+            signatureProofProps
+        } = identity
+
         const password: string = (process.env.SINGLE_KEY_LOGIN as string).trim()
 
         try {
@@ -120,3 +137,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(400).json("Request body is empty.")
     }
 }
+
+export default authMiddleware(handler)

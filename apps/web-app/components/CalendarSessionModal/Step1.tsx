@@ -160,7 +160,11 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
 
     const fetchTraks = async () => {
         await axios
-            .get("/api/fetchTracks")
+            .get("/api/fetchTracks", {
+                headers: {
+                    "x-api-key": process.env.KEY_TO_API as string
+                }
+            })
             .then((res) => {
                 if (res.data) {
                     const data = res.data.filter((item: any) => item.type !== "Other")
@@ -172,7 +176,11 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
 
     const fetchLevels = async () => {
         await axios
-            .get("/api/fetchLevels")
+            .get("/api/fetchLevels", {
+                headers: {
+                    "x-api-key": process.env.KEY_TO_API as string
+                }
+            })
             .then((res) => {
                 setLevelsOpt(res.data)
             })
@@ -181,7 +189,11 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
 
     const fetchEventTypes = async () => {
         await axios
-            .get("/api/fetchEventTypes")
+            .get("/api/fetchEventTypes", {
+                headers: {
+                    "x-api-key": process.env.KEY_TO_API as string
+                }
+            })
             .then((res) => {
                 setEventTypesOpt(res.data)
             })
@@ -190,7 +202,11 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
 
     const fetchFormats = async () => {
         await axios
-            .get("/api/fetchFormats")
+            .get("/api/fetchFormats", {
+                headers: {
+                    "x-api-key": process.env.KEY_TO_API as string
+                }
+            })
             .then((res) => {
                 setFormatsOpt(res.data)
             })
@@ -199,8 +215,15 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
 
     const fetchLocations = async () => {
         await axios
-            .get("/api/fetchLocations")
+            .get("/api/fetchLocations", {
+                headers: {
+                    "x-api-key": process.env.KEY_TO_API as string,
+                    "x-api-type": "fetchLocations"
+                }
+            })
             .then((res) => {
+                console.log("locations res", res)
+                console.log("Locations", res.data)
                 setLocationsOpt(res.data)
             })
             .catch((err) => console.log(err))
@@ -208,7 +231,11 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
 
     const fetchUsers = async () => {
         await axios
-            .get("/api/fetchUsers")
+            .get("/api/fetchUsers", {
+                headers: {
+                    "x-api-key": process.env.KEY_TO_API as string
+                }
+            })
             .then((res) => {
                 setSuggestions(res.data)
             })
@@ -377,6 +404,7 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
                         onChange={(e: any) => setNewSession({ ...newSession, startTime: e.target.value })}
                     />
                 </div>
+
                 <div className="flex flex-col w-full md:w-2/6">
                     <label htmlFor="startTime" className="font-[600]">
                         End Time*
@@ -384,6 +412,7 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
                     <TimeDropdown
                         id="endTime"
                         value={newSession.endTime}
+                        minTime={newSession.startTime}
                         onChange={(e: any) => setNewSession({ ...newSession, endTime: e.target.value })}
                     />
                 </div>

@@ -1,13 +1,13 @@
 import { NextApiRequest, NextApiResponse } from "next"
-import { createClient } from "@supabase/supabase-js"
 
-const supabaseUrl = "https://polcxtixgqxfuvrqgthn.supabase.co"
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY
-const supabase = createClient(supabaseUrl, supabaseKey as string)
+import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
+import authMiddleware from "../../hooks/auth"
 
-export default async function handler(_req: NextApiRequest, res: NextApiResponse) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+    const supabase = createServerSupabaseClient({ req, res })
     try {
         const response = await supabase.from("locations").select("*")
+        console.log("RESPONSE LOCATIONS", response)
         if (response.error === null) res.status(200).send(response.data)
         else res.status(response.status).send(response.error)
     } catch (err: any) {
@@ -15,3 +15,5 @@ export default async function handler(_req: NextApiRequest, res: NextApiResponse
         res.status(500).json({ statusCode: 500, message: err })
     }
 }
+
+export default handler
