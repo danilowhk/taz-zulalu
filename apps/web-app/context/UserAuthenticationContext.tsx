@@ -31,42 +31,45 @@ export function UserAuthenticationProvider({ children }: UserAuthenticationProvi
 
     const isAuth = useMemo(() => Boolean(userInfo), [userInfo])
 
-    const supabase = createBrowserSupabaseClient()
-
     const fetchUser = async () => {
-        const {
-            data: { session }
-        } = await supabase.auth.getSession()
-
-        if (!session) {
-            return setUserInfo(undefined)
-        }
-
-        if (session.user.id) {
-            const userId = `${window.location.origin}/api/fetchUser/${session.user.id!}/`
-            await axios
-                .post(
-                    userId,
-                    {},
-                    {
-                        headers: {
-                            "x-api-key": `${KEY_TO_API}`,
-                            "x-api-type": "API fetchUser"
-                            // Pass cookies from the incoming request
-                        }
+        await axios
+            .post(
+                "/api/apiSupabaseSession",
+                {},
+                {
+                    headers: {
+                        "x-api-key": `${KEY_TO_API}`
+                        // Pass cookies from the incoming request
                     }
-                )
-                .then((res) => {
-                    setUserRole(res.data.role)
-                    setUserInfo(res.data)
-                })
-                .catch((error) => {
-                    console.log("USER AUTH CONTEXT FAILED TO FETCH USER ID", error)
-                })
-        } else {
-            setErrorAuth(true)
-            console.log("USER AUTH CONTEXT FAILED TO FETCH USER ID")
-        }
+                }
+            )
+            .then(async (responsee) => {
+                if (responsee.data.user.id) {
+                    const userId = `${window.location.origin}/api/fetchUser/${responsee.data.user.id!}/`
+                    await axios
+                        .post(
+                            userId,
+                            {},
+                            {
+                                headers: {
+                                    "x-api-key": `${KEY_TO_API}`
+                                    // Pass cookies from the incoming request
+                                }
+                            }
+                        )
+                        .then((res) => {
+                            setUserRole(res.data.role)
+                            setUserInfo(res.data)
+                        })
+                        .catch((error) => {
+                            console.log("USER AUTH CONTEXT FAILED TO FETCH USER ID", error)
+                        })
+                } else {
+                    setErrorAuth(true)
+                    console.log("USER AUTH CONTEXT FAILED TO FETCH USER ID")
+                }
+            })
+            .catch((err) => setUserInfo(undefined))
     }
 
     const fetchEvents = async () => {

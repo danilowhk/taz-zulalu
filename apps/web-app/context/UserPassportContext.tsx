@@ -36,11 +36,6 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
     const PASSPORT_URL = "https://zupass.org/"
     const PASSPORT_SERVER_URL = "https://api.pcd-passport.com/"
 
-    function requestProofFromPassport(proofUrl: string) {
-        const popupUrl = `/popup?proofUrl=${encodeURIComponent(proofUrl)}`
-        window.open(popupUrl, "_blank", "width=360,height=480,top=100,popup")
-    }
-
     const [pcdStr2, _passportPendingPCDStr] = usePassportPopupMessages()
 
     function requestSignedZuID() {
@@ -49,7 +44,6 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
         // requestProofFromPassport(proofUrl)
     }
 
-    // // Listen for PCDs coming back from the Passport popup
     useEffect(() => {
         async function receiveMessage(ev: MessageEvent<any>) {
             if (!ev.data.encodedPcd) return
@@ -59,7 +53,6 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
         window.addEventListener("message", receiveMessage, false)
     }, [])
 
-    // Request a Zuzalu UUID-revealing proof from Passport
     const [signatureProofValid, setSignatureProofValid] = useState<boolean | undefined>()
     const onProofVerified = (valid: boolean) => {
         setSignatureProofValid(valid)
@@ -67,7 +60,6 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
 
     const { signatureProof } = useSemaphoreSignatureProof(pcdStr, onProofVerified)
 
-    // Extract UUID, the signed message of the returned PCD
     useEffect(() => {
         if (signatureProofValid && signatureProof) {
             const userUuid = signatureProof.claim.signedMessage
@@ -75,16 +67,14 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
         }
     }, [signatureProofValid, signatureProof])
 
-    // Finally, once we have the UUID, fetch the participant data from Passport.
     const { participant } = useFetchParticipant(PASSPORT_SERVER_URL, uuid)
 
     const loginProof = async (participant1: any, signatureProofProps: any) => {
-        console.log("participant1", participant1)
         try {
             await axios({
                 method: "post",
-                url: "https://zuzalu.city/api/passport-user-login/",
-                data: { participant1, signatureProofProps },
+                url: "https://6750-62-4-33-200.ngrok-free.app/api/passport-user-login/",
+                data: { participant1, pcdStr },
                 headers: {
                     "Content-Type": "application/json",
                     "x-api-key": process.env.KEY_TO_API as string,
@@ -111,7 +101,6 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
                     }
                 })
                 .catch((error) => {
-                    console.log("AXIOS CALL USER PASSPORT CONTEXT POST", error)
                     setErrorPassport(true)
                 })
         } catch (error1) {
