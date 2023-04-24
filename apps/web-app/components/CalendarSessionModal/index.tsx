@@ -137,7 +137,9 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions, event }: P
                 const createEventDB = await axios.post(
                     "/api/createSession",
                     {
-                        ...newSession
+                        ...newSession,
+                        startTime: newSession.startTime.replace(" PM", "").replace(" AM", ""),
+                        endTime: newSession.endTime.replace(" PM", "").replace(" AM", "")
                     },
                     {
                         headers: {

@@ -16,4 +16,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 }
 
-export default handler
+export default authMiddleware(handler)

@@ -41,7 +41,7 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ id, value, onChange, minTim
                 Please Select
             </option>
             {filteredTimes.map((time, index) => (
-                <option key={index} value={time.replace(" AM", "").replace(" PM", "")}>
+                <option key={index} value={time}>
                     {time}
                 </option>
             ))}
