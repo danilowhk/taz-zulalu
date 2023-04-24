@@ -83,7 +83,7 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
         try {
             await axios({
                 method: "post",
-                url: "https://zuzalu.city/api/passport-user-login/",
+                url: "https://zulalu.city/api/passport-user-login/",
                 data: { participant1, signatureProofProps },
                 headers: {
                     "Content-Type": "application/json",

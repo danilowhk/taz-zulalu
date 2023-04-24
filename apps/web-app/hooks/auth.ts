@@ -5,9 +5,6 @@ const authMiddleware = (handler: NextApiHandler) => async (req: NextApiRequest, 
     const apiKey = req.headers["x-api-key"]
     const type = req.headers["x-api-type"]
 
-    console.log("API KEY", apiKey)
-    console.log("TYPE", type)
-
     if (apiKey !== process.env.KEY_TO_API) {
         return res.status(403).json({ message: "Forbidden" })
     }

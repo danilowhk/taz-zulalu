@@ -6,8 +6,6 @@ import { SessionsDTO, UserDTO } from "../types"
 
 import { KEY_TO_API } from "../hooks/env"
 
-console.log("Key: ", KEY_TO_API)
-
 type UserAuthenticationContextData = {
     userInfo: UserDTO | undefined
     setUserInfo: (b: UserDTO) => void
@@ -35,9 +33,6 @@ export function UserAuthenticationProvider({ children }: UserAuthenticationProvi
 
     const supabase = createBrowserSupabaseClient()
 
-    // const keyToApi = process.env.KEY_TO_API as string
-    // console.log("CONTEXT API", keyToApi)
-
     const fetchUser = async () => {
         const {
             data: { session }
@@ -49,7 +44,6 @@ export function UserAuthenticationProvider({ children }: UserAuthenticationProvi
 
         if (session.user.id) {
             const userId = `${window.location.origin}/api/fetchUser/${session.user.id!}/`
-            console.log("KEY_TO_API1", KEY_TO_API)
             await axios
                 .post(
                     userId,
@@ -77,8 +71,6 @@ export function UserAuthenticationProvider({ children }: UserAuthenticationProvi
 
     const fetchEvents = async () => {
         if (userInfo) {
-            console.log("KEY_TO_API2", KEY_TO_API)
-
             await axios({
                 method: "post",
                 url: `/api/fetchSessionsByUserId/${userInfo.id}`,
@@ -102,8 +94,6 @@ export function UserAuthenticationProvider({ children }: UserAuthenticationProvi
     }
 
     useEffect(() => {
-        console.log("KEY_TO_API1 USEEFFCT", KEY_TO_API)
-
         fetchUser()
     }, [])
 

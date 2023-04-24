@@ -21,9 +21,21 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
                 "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
             }
         })
-        const sessions = response.data
+
+        const sessions: SessionsDTO[] = response.data
+        const newArray = sessions.map((item) => ({
+            id: item.id,
+            name: item.name,
+            startDate: item.startDate,
+            startTime: item.startTime,
+            endTime: item.end_time,
+            location: item.location,
+            customLocation: item.custom_location,
+            equipment: item.equipment
+        }))
+
         return {
-            props: { sessions }
+            props: { sessions: newArray }
         }
     } catch (error) {
         res.statusCode = 404
