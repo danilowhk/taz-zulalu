@@ -15,33 +15,19 @@ import UserIcon from "../../public/userIcon.svg"
 
 import TimeDropdown from "../TimeDropdown"
 
-import { TracksDTO, FormatDTO, LevelDTO, LocationDTO, EventTypeDTO, EventsDTO, SessionsDTO, UserDTO } from "../../types"
+import { removeTimezone, displayDateWithoutTimezone } from "../../data/dateFormat"
 
-type NewSessionState = {
-    description: string
-    event_id: number
-    event_type: string
-    maxRsvp: string
-    format: string
-    hasTicket: boolean
-    equipment: string
-    info: string
-    level: string
-    location: string
-    custom_location: string
-    name: string
-    startDate: Date
-    endTime: string
-    startTime: string
-    tags: string[]
-    team_members: {
-        name: string
-        role: string
-    }[]
-    track: string
-    event_slug: string
-    event_item_id: number
-}
+import {
+    TracksDTO,
+    FormatDTO,
+    LevelDTO,
+    LocationDTO,
+    EventTypeDTO,
+    EventsDTO,
+    SessionsDTO,
+    UserDTO,
+    NewSessionState
+} from "../../types"
 
 type Props = {
     newSession: NewSessionState
@@ -76,6 +62,7 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
         maxRsvp,
         track
     } = newSession
+
     const wraperRef = useRef(null)
     const [tag, setTag] = useState("")
     const [rerender, setRerender] = useState(true)
@@ -222,8 +209,6 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
                 }
             })
             .then((res) => {
-                console.log("locations res", res)
-                console.log("Locations", res.data)
                 setLocationsOpt(res.data)
             })
             .catch((err) => console.log(err))
@@ -388,7 +373,7 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
                     <DatePicker
                         className="border-[#C3D0CF] border-2 p-1 rounded-[8px] h-[42px] w-full"
                         selected={startDate}
-                        onChange={(e: any) => {
+                        onChange={(e: Date) => {
                             setNewSession({ ...newSession, startDate: e })
                         }}
                         minDate={moment().toDate()}

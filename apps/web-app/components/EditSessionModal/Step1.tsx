@@ -16,6 +16,7 @@ import UserIcon from "../../public/userIcon.svg"
 import TimeDropdown from "../TimeDropdown"
 
 import { TracksDTO, FormatDTO, LevelDTO, LocationDTO, EventTypeDTO, EventsDTO, SessionsDTO, UserDTO } from "../../types"
+import { to12HourFormat, to24HourFormat } from "../../data/dateFormat"
 
 type NewSessionState = {
     description: string
@@ -407,6 +408,7 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionI
                     </label>
                     <TimeDropdown
                         id="endTime"
+                        minTime={to12HourFormat(newSession.startTime)}
                         value={endTime}
                         onChange={(e: any) => setNewSession({ ...newSession, endTime: e.target.value })}
                     />

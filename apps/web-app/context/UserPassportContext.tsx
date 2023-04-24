@@ -36,11 +36,6 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
     const PASSPORT_URL = "https://zupass.org/"
     const PASSPORT_SERVER_URL = "https://api.pcd-passport.com/"
 
-    function requestProofFromPassport(proofUrl: string) {
-        const popupUrl = `/popup?proofUrl=${encodeURIComponent(proofUrl)}`
-        window.open(popupUrl, "_blank", "width=360,height=480,top=100,popup")
-    }
-
     const [pcdStr2, _passportPendingPCDStr] = usePassportPopupMessages()
 
     function requestSignedZuID() {
@@ -79,7 +74,6 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
     const { participant } = useFetchParticipant(PASSPORT_SERVER_URL, uuid)
 
     const loginProof = async (participant1: any, signatureProofProps: any) => {
-        console.log("participant1", participant1)
         try {
             await axios({
                 method: "post",
@@ -111,7 +105,6 @@ export function UserPassportContextProvider({ children }: UserPassportProviderPr
                     }
                 })
                 .catch((error) => {
-                    console.log("AXIOS CALL USER PASSPORT CONTEXT POST", error)
                     setErrorPassport(true)
                 })
         } catch (error1) {

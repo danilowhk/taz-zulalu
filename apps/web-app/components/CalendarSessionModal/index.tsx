@@ -1,40 +1,14 @@
 import { Dialog, Transition } from "@headlessui/react"
-import { toast } from "react-toastify"
 import { useRouter } from "next/router"
 import { Fragment, useRef, useState } from "react"
+import { toast } from "react-toastify"
 import axios from "axios"
-
 import moment from "moment"
 import ModalSteps from "./ModalSteps"
 import Step1 from "./Step1"
 import Step2 from "./Step2"
-import { EventsDTO, SessionsDTO } from "../../types"
-
-type NewSessionState = {
-    description: string
-    equipment: string
-    event_id: number
-    event_type: string
-    maxRsvp: string
-    format: string
-    hasTicket: boolean
-    info: string
-    level: string
-    location: string
-    custom_location: string
-    name: string
-    startDate: Date
-    endTime: string
-    startTime: string
-    tags: string[]
-    team_members: {
-        name: string
-        role: string
-    }[]
-    track: string
-    event_slug: string
-    event_item_id: number
-}
+import { EventsDTO, SessionsDTO, NewSessionState } from "../../types"
+import { to24HourFormat } from "../../data/dateFormat"
 
 type Props = {
     isOpen: boolean
@@ -55,7 +29,7 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions, event }: P
         description: "",
         name: "",
         team_members: [],
-        startDate: moment().utc().toDate(),
+        startDate: moment.utc().toDate(),
         startTime: "",
         endTime: "",
         location: "",
@@ -80,75 +54,21 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions, event }: P
         setIsLoading(true)
 
         try {
-            if (newSession.hasTicket) {
-                // Step 1 Create SubEvent
-
-                const subEventRes = await axios.post(
-                    `/api/pretix-create-subevent`,
-                    {
-                        name: newSession.name,
-                        startDate: newSession.startDate,
-                        slug: newSession.event_slug,
-                        itemId: newSession.event_item_id
-                    },
-                    {
-                        headers: {
-                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
-                        }
+            const createEventDB = await axios.post(
+                "/api/createSession",
+                {
+                    ...newSession,
+                    startDate: moment.utc(newSession.startDate).format("YYYY-MM-DD"),
+                    startTime: to24HourFormat(newSession.startTime),
+                    endTime: to24HourFormat(newSession.endTime)
+                },
+                {
+                    headers: {
+                        "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
                     }
-                )
-
-                console.log("Created subEvent response: ", subEventRes.data)
-
-                // // Step 3 Create Quota for the subEvent
-
-                const quotaCreatedRes = await axios.post(
-                    `/api/pretix-create-quota/`,
-                    {
-                        ticketAmount: amountTickets,
-                        subEventId: subEventRes.data.id,
-                        slug: newSession.event_slug,
-                        itemId: newSession.event_item_id
-                    },
-                    {
-                        headers: {
-                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
-                        }
-                    }
-                )
-
-                console.log("Quota creatd: ", quotaCreatedRes.data)
-                // Step 5 Add to database
-                const createEventDB = await axios.post(
-                    "/api/createSession",
-                    {
-                        ...newSession,
-                        subEventId: subEventRes.data.id,
-                        quota_id: quotaCreatedRes.data.id
-                    },
-                    {
-                        headers: {
-                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
-                        }
-                    }
-                )
-                console.log("DB response: ", createEventDB)
-            } else {
-                const createEventDB = await axios.post(
-                    "/api/createSession",
-                    {
-                        ...newSession,
-                        startTime: newSession.startTime.replace(" PM", "").replace(" AM", ""),
-                        endTime: newSession.endTime.replace(" PM", "").replace(" AM", "")
-                    },
-                    {
-                        headers: {
-                            "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
-                        }
-                    }
-                )
-                console.log("DB response: ", createEventDB)
-            }
+                }
+            )
+            console.log("DB response: ", createEventDB)
         } catch (error) {
             console.log("Error creating session", error)
             toast.error("Failed to create an event", {
