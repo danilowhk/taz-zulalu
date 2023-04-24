@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs"
 
+// TODO: CHANGE TO API
+
 const supabase = createBrowserSupabaseClient()
 
 export default function getUserSession() {

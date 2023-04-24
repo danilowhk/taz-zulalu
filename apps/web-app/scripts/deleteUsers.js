@@ -1,5 +1,6 @@
 const { createClient } = require("@supabase/supabase-js")
 
+//TODO: CHANGE TO API
 const supabaseUrl = "https://polcxtixgqxfuvrqgthn.supabase.co"
 const supabaseKey = process.env.SUPABASE_KEY
 const supabase = createClient(supabaseUrl, supabaseKey, {
