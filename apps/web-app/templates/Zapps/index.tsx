@@ -62,14 +62,12 @@ const Zapps = () => (
 
             <div className="flex md:hidden flex-col w-full gap-5">
                 {projects.map((item, index) => (
-                    <a href={item.link} target="_blank" rel="noopener noreferrer">
-                    <div key={index} className="flex h-[165px] flex-col shadow-md rounded-[16px]">
+                    <a key={index} href={item.link} target="_blank" rel="noopener noreferrer" className="flex h-[165px] flex-col shadow-md rounded-[16px]">
                         <NextImage src={item.img} width={900} height={400} objectFit="cover" />
                         <div className="flex flex-col p-2 gap-2 h-full">
-                        <h1 className="text-[18px] font-[600]">{item.name}</h1>
-                        <h1 className="text-[10px]">{item.desc}</h1>
+                            <h1 className="text-[18px] font-[600]">{item.name}</h1>
+                            <h1 className="text-[10px]">{item.desc}</h1>
                         </div>
-                    </div>
                     </a>
                 ))}
             </div>

@@ -113,7 +113,6 @@ const Header = () => {
                             }`}
                         >
                             Livestreams
-                            <FiArrowUpRight />
                         </li>
                     </a>
                     <NextLink href={"/zapps"}>
