@@ -45,6 +45,15 @@ type Props = {
 }
 
 const EditSessionModal = ({ isOpen, closeModal, session, sessions, events }: Props) => {
+    const to12HourFormat = (time: string) => {
+        const [hour, minute] = time.split(":")
+        const hourInt = parseInt(hour)
+        const amPm = hourInt >= 12 ? "PM" : "AM"
+        const hour12 = hourInt % 12 === 0 ? 12 : hourInt % 12
+        const hourString = hour12 < 10 ? `0${hour12}` : hour12
+        return `${hourString}:${minute} ${amPm}`
+    }
+
     const router = useRouter()
     const questionTextRef = useRef(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -54,8 +63,8 @@ const EditSessionModal = ({ isOpen, closeModal, session, sessions, events }: Pro
         name: session.name,
         team_members: session.team_members,
         startDate: displayDateWithoutTimezone(session.startDate),
-        startTime: session.startTime,
-        endTime: session.end_time,
+        startTime: to12HourFormat(session.startTime),
+        endTime: to12HourFormat(session.end_time),
         location: session.location,
         custom_location: session.custom_location,
         tags: session.tags,
@@ -72,7 +81,20 @@ const EditSessionModal = ({ isOpen, closeModal, session, sessions, events }: Pro
         event_item_id: session.event_item_id
     })
 
-    const [amountTickets, setAmountTickets] = useState("0")
+    const to24HourFormat = (time: string) => {
+        const [timePart, amPm] = time.split(" ")
+        const [hour, minute] = timePart.split(":")
+
+        let hourInt = parseInt(hour)
+        if (amPm === "PM" && hourInt !== 12) {
+            hourInt += 12
+        } else if (amPm === "AM" && hourInt === 12) {
+            hourInt = 0
+        }
+
+        const hourString = hourInt < 10 ? `0${hourInt}` : hourInt
+        return `${hourString}:${minute}`
+    }
 
     const handleSubmit = async () => {
         setIsLoading(true)
@@ -83,6 +105,8 @@ const EditSessionModal = ({ isOpen, closeModal, session, sessions, events }: Pro
                     "/api/updateSession",
                     {
                         ...newSession,
+                        startTime: to24HourFormat(newSession.startTime),
+                        endTime: to24HourFormat(newSession.endTime),
                         id: session.id
                     },
                     {
