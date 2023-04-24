@@ -1,5 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
+import { SerializedPCD } from "@pcd/pcd-types"
+import { fetchParticipant } from "@pcd/passport-interface"
+import { SemaphoreSignaturePCDPackage } from "@pcd/semaphore-signature-pcd"
+
 import authMiddleware from "../../hooks/auth"
 
 interface Identity {
@@ -12,16 +16,8 @@ interface Identity {
         residence: string
         order_id: string
     }
-    signatureProofProps: {
-        type: string
-        id: string
-        claim: {
-            identityCommitment: string
-            signedMessage: string
-            nullifierHash: string
-        }
-        proof: string[]
-    }
+
+    pcdStr: string
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -30,8 +26,30 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         // Validate Proof of user before interacting with DB
         const {
             participant1: { uuid, commitment, email, name, role, residence, order_id },
-            signatureProofProps
+            pcdStr
         } = identity
+
+        // pcdStr comes in a request parameter
+        const serPcd = JSON.parse(pcdStr) as SerializedPCD
+
+        if (serPcd.type !== SemaphoreSignaturePCDPackage.name) {
+            throw new Error("Invalid PCD type")
+        }
+        const pcd = await SemaphoreSignaturePCDPackage.deserialize(serPcd.pcd)
+        if (!(await SemaphoreSignaturePCDPackage.verify(pcd))) {
+            throw new Error("Invalid proof")
+        }
+
+        // console.log("AQUI", participant)
+
+        // Valid proof, check the signed message
+
+        const participant = await fetchParticipant("https://api.pcd-passport.com/", uuid)
+        console.log("3")
+
+        if (participant == null || participant.commitment !== pcd.claim.identityCommitment) {
+            throw new Error("Wrong UUID")
+        }
 
         const password: string = (process.env.SINGLE_KEY_LOGIN as string).trim()
 
@@ -43,25 +61,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             })
             // If sign in was successful, we're done
             if (data && data.user) {
-                const {
-                    data: updatePubUserData,
-                    error: updatePubUserError,
-                    status,
-                    statusText
-                } = await supabase.from("users").update({ uui_auth: data.user.id, role }).eq("email", email)
+                const { error: updatePubUserError } = await supabase
+                    .from("users")
+                    .update({ uui_auth: data.user.id, role })
+                    .eq("email", email)
 
                 if (updatePubUserError) {
                     res.status(400).json("Error with updating public user")
                 }
-                console.log("update pub", updatePubUserData)
-                console.log("update pub status", status)
-                console.log("update pub statusText", statusText)
                 res.status(200).json("User signed in!")
             }
 
             // If use sign in was not successful, we need to create the user and then sign them in
             if (error) {
-                console.log("Sign in error received (this is expected if first time signing in): ", error)
                 const { data: signupData, error: signupError } = await supabase.auth.signUp({
                     email,
                     password,
@@ -94,8 +106,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                         .single()
 
                     if (publicUserError) {
-                        console.log(`Error fetching public user: ${JSON.stringify(publicUserError)}`)
-                        // res.status(400).json(`Error fetching public user: ${JSON.stringify(publicUserError)}`)
+                        res.status(400).json(`Error fetching public user: ${JSON.stringify(publicUserError)}`)
                     }
 
                     // If user profile exists, do an update of the uui_auth field
@@ -104,7 +115,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                             .from("users")
                             .update({ uui_auth: signupData.user.id, role })
                             .eq("email", email)
-                        console.log("Updated existing user", updatePublicUser)
                     }
                     // Otherwise, add the user profile
                     else {
@@ -118,15 +128,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                         if (addUserError) {
                             res.status(400).json("Error fetching public user")
                         }
-
-                        console.log("User don't exist on db and added user", addUserData)
                     }
 
                     res.status(200).json("User signed up!")
                 }
             }
         } catch (error) {
-            console.log(error)
             res.status(500).json("Server error")
         }
     }
