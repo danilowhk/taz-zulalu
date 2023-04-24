@@ -23,7 +23,17 @@ const EditProfileModal = ({ isOpen, closeModal, userProfile, reRender, setRerend
 
     const handleSubmit = async () => {
         setIsLoading(true)
-        await axios.post("/api/updateProfile", profile)
+        await axios.post(
+            "/api/updateProfile",
+            {
+                profile
+            },
+            {
+                headers: {
+                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                }
+            }
+        )
         setIsLoading(false)
         closeModal(false)
         setRerender(!reRender)

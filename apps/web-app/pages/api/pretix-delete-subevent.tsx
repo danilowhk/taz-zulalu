@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import axios from "axios"
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const auth = process.env.NEXT_PUBLIC_PRETIX_API
     const headers = {
         Accept: "application/json, text/javascript",
@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         console.log(response)
 
-        if (response.status == 204) {
+        if (response.status === 204) {
             res.status(200).json(response.data)
         } else {
             throw new Error(`HTTP error! status: ${response.status}`)

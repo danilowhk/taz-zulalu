@@ -17,15 +17,28 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     try {
         const url = process.env.URL_TO_FETCH
 
-        const eventsResponse = await fetch(`${url}/api/fetchEvents`)
-
-        const events: EventsDTO[] = await eventsResponse.json()
-
-        const responseSessions = await axios.get(`${url}/api/fetchSessions`, {
-            headers: {
-                Cookie: req.headers.cookie || "" // Pass cookies from the incoming request
+        const eventsResponse = await axios.post(
+            `${url}/api/fetchEvents`,
+            {},
+            {
+                headers: {
+                    "x-api-key": process.env.KEY_TO_API as string
+                }
             }
-        })
+        )
+
+        const events: EventsDTO[] = await eventsResponse.data
+
+        const responseSessions = await axios.post(
+            `${url}/api/fetchSessions`,
+            {},
+            {
+                headers: {
+                    Cookie: req.headers.cookie || "",
+                    "x-api-key": process.env.KEY_TO_API as string
+                }
+            }
+        )
 
         const sessions = await responseSessions.data
 

@@ -159,7 +159,11 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionI
 
     const fetchTraks = async () => {
         await axios
-            .get("/api/fetchTracks")
+            .get("/api/fetchTracks", {
+                headers: {
+                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                }
+            })
             .then((res) => {
                 setTracksOpt(res.data)
             })
@@ -168,7 +172,11 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionI
 
     const fetchLevels = async () => {
         await axios
-            .get("/api/fetchLevels")
+            .get("/api/fetchLevels", {
+                headers: {
+                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                }
+            })
             .then((res) => {
                 setLevelsOpt(res.data)
             })
@@ -177,7 +185,11 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionI
 
     const fetchEventTypes = async () => {
         await axios
-            .get("/api/fetchEventTypes")
+            .get("/api/fetchEventTypes", {
+                headers: {
+                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                }
+            })
             .then((res) => {
                 setEventTypesOpt(res.data)
             })
@@ -186,7 +198,11 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionI
 
     const fetchFormats = async () => {
         await axios
-            .get("/api/fetchFormats")
+            .get("/api/fetchFormats", {
+                headers: {
+                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                }
+            })
             .then((res) => {
                 setFormatsOpt(res.data)
             })
@@ -195,7 +211,11 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionI
 
     const fetchLocations = async () => {
         await axios
-            .get("/api/fetchLocations")
+            .get("/api/fetchLocations", {
+                headers: {
+                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                }
+            })
             .then((res) => {
                 setLocationsOpt(res.data)
             })
@@ -204,7 +224,11 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionI
 
     const fetchUsers = async () => {
         await axios
-            .get("/api/fetchUsers")
+            .get("/api/fetchUsers", {
+                headers: {
+                    "x-api-key": process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                }
+            })
             .then((res) => {
                 setSuggestions(res.data)
             })

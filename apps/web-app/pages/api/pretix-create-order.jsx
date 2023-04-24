@@ -1,30 +1,29 @@
 // pages/api/create-order.js
 import axios from "axios"
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
+import authMiddleware from "../../hooks/auth"
 
-export default async function handler(req, res) {
-
-  const auth = process.env.NEXT_PUBLIC_PRETIX_API
+const handler = async (req, res) => {
+    const auth = process.env.NEXT_PUBLIC_PRETIX_API
     const headers = {
         Accept: "application/json, text/javascript",
         Authorization: `Token ${auth}`,
         "Content-Type": "application/json"
     }
 
-    const supabase = createServerSupabaseClient({ req, res });
+    const supabase = createServerSupabaseClient({ req, res })
     // Check if we have a session
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+        data: { session }
+    } = await supabase.auth.getSession()
     console.log("delete sesion 2", session)
     if (!session)
-      return res.status(401).json({
-        error: "not_authenticated",
-        description:
-          "The user does not have an active session or is not authenticated",
-      });
+        return res.status(401).json({
+            error: "not_authenticated",
+            description: "The user does not have an active session or is not authenticated"
+        })
 
-      console.log(session.user.email, session.user.user_metadata.name)
+    console.log(session.user.email, session.user.user_metadata.name)
 
     const { subEventId, slug, itemId, name, id } = req.body
 
@@ -60,10 +59,18 @@ export default async function handler(req, res) {
         )
 
         console.log(response)
-        const inputToSupabase = await supabase.from("tickets").insert({email: session.user.email, pdf_link: response.data.downloads[0].url, name: name, session_id: id, user_id: user.data.id})
+        const inputToSupabase = await supabase
+            .from("tickets")
+            .insert({
+                email: session.user.email,
+                pdf_link: response.data.downloads[0].url,
+                name,
+                session_id: id,
+                user_id: user.data.id
+            })
 
         console.log(inputToSupabase)
-        if (response.status == 201) {
+        if (response.status === 201) {
             res.status(201).json("Ticket bought!")
         } else {
             throw new Error(`HTTP error! status: ${response.status}`)
@@ -73,3 +80,5 @@ export default async function handler(req, res) {
         res.status(500).json({ message: "Internal server error" })
     }
 }
+
+export default authMiddleware(handler)
