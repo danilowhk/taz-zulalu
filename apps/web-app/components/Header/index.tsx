@@ -165,6 +165,25 @@ const Header = () => {
                             FAQ
                         </li>
                     </NextLink>
+                    <a href={"https://zuzalu.streameth.org/"} target="_blank">
+                        <li
+                            className={`flex items-center gap-2 cursor-pointer text-[#F8FFFE] text-[18px] ${
+                                router.asPath === "/faq" ? "font-[700]" : "font-[400]"
+                            }`}
+                        >
+                            Livestreams
+                            <FiArrowUpRight />
+                        </li>
+                    </a>
+                    <NextLink href={"/zapps"}>
+                        <li
+                            className={`cursor-pointer text-[#F8FFFE] text-[18px] ${
+                                router.asPath === "/zapps" ? "font-[700]" : "font-[400]"
+                            }`}
+                        >
+                            ZApps
+                        </li>
+                    </NextLink>
                     <a href={"https://zupass.org/"} target="_blank">
                         <li
                             className={`flex items-center gap-2 cursor-pointer text-[#F8FFFE] text-[18px] ${

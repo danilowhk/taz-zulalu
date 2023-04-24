@@ -2,6 +2,8 @@ import { NextApiRequest, NextApiResponse } from "next"
 import { createClient } from "@supabase/supabase-js"
 import authMiddleware from "../../hooks/auth"
 
+
+
 const supabaseUrl = "https://polcxtixgqxfuvrqgthn.supabase.co"
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY
 const supabase = createClient(supabaseUrl, supabaseKey as string)
