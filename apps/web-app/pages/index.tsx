@@ -3,14 +3,16 @@ import { GetServerSideProps } from "next"
 import Dexie from "dexie"
 import axios from "axios"
 import { useEffect } from "react"
-import { EventsDTO } from "../types"
+import { EventsDTO, SessionsDTO } from "../types"
 import HomeTemplate from "../templates/Home"
+import moment from "moment"
 
 type Props = {
+    sessions: SessionsDTO[]
     events: EventsDTO[]
 }
 
-const Home = ({ events }: Props) => {
+const Home = ({ sessions, events }: Props) => {
     const currentVersion = "1.3.0"
     const storageVersionKey = "myAppVersion"
 
@@ -68,12 +70,12 @@ const Home = ({ events }: Props) => {
         checkAndUpdateVersion()
     }, [])
 
-    return <HomeTemplate events={events} />
+    return <HomeTemplate sessions={sessions} events={events} />
 }
 
 export default Home
 
-export const getServerSideProps: GetServerSideProps = async ({ res }) => {
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     try {
         const url = process.env.URL_TO_FETCH
 
@@ -82,13 +84,37 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
             {},
             {
                 headers: {
-                    htmlcode: process.env.KEY_TO_API as string // Pass cookies from the incoming request
+                    htmlcode: process.env.KEY_TO_API as string
                 }
             }
         )
-        const events = await eventsResponse.data
+
+        const events: EventsDTO[] = await eventsResponse.data
+
+        const responseSessions = await axios.post(
+            `${url}/api/fetchSessions`,
+            {},
+            {
+                headers: {
+                    Cookie: req.headers.cookie || "",
+                    htmlcode: process.env.KEY_TO_API as string
+                }
+            }
+        )
+
+        const sessions = await responseSessions.data
+
+        // Filter sessions to only include sessions for the upcoming 7 days
+        const filtered = sessions.filter((session: any) => {
+            const sessionStartDate = moment.utc(session.startDate).toDate()
+            const currentDate = moment.utc(new Date()).toDate()
+            const sevenDaysfromNow = moment(currentDate).add(7, "days").toDate()
+
+            return (currentDate <= sessionStartDate && sessionStartDate <= sevenDaysfromNow)
+        })
+
         return {
-            props: { events }
+            props: { sessions: filtered, events }
         }
     } catch (error) {
         res.statusCode = 404
