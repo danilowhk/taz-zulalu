@@ -8,7 +8,7 @@ import ModalSteps from "./ModalSteps"
 import Step1 from "./Step1"
 import Step2 from "./Step2"
 import { EventsDTO, SessionsDTO, NewSessionState } from "../../types"
-import { to24HourFormat } from "../../data/dateFormat"
+import { displayDateWithoutTimezone, to24HourFormat } from "../../data/dateFormat"
 
 type Props = {
     isOpen: boolean
@@ -58,7 +58,7 @@ const CalendarSessionModal = ({ isOpen, closeModal, events, sessions, event }: P
                 "/api/createSession",
                 {
                     ...newSession,
-                    startDate: moment.utc(newSession.startDate).format("YYYY-MM-DD"),
+                    startDate: displayDateWithoutTimezone(newSession.startDate),
                     startTime: to24HourFormat(newSession.startTime),
                     endTime: to24HourFormat(newSession.endTime)
                 },
