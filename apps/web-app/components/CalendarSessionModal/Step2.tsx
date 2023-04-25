@@ -29,14 +29,12 @@ const Step2 = ({ setSteps, newSession, handleSubmit, isLoading }: Props) => {
                     <NextImage src="/vector-calendar.svg" width={20} height={20} />
                     <h1>{moment.utc(newSession.startDate).format("dddd, MMMM DD")}</h1>
                 </div>
-                {newSession.track !== "Open Sessions" && (
-                    <div className="flex items-center gap-2">
-                        <NextImage src="/vector-location.svg" width={20} height={20} />
-                        <h1 className="text-[18px]">
-                            {newSession.location === "Other" ? newSession.custom_location : newSession.location}
-                        </h1>
-                    </div>
-                )}
+                <div className="flex items-center gap-2">
+                    <NextImage src="/vector-location.svg" width={20} height={20} />
+                    <h1 className="text-[18px]">
+                        {newSession.location === "Other" ? newSession.custom_location : newSession.location}
+                    </h1>
+                </div>
                 <div className="flex items-center gap-2">
                     <NextImage src="/vector-clock.svg" width={20} height={20} />
                     <h1>

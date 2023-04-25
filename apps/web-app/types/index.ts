@@ -127,6 +127,7 @@ export interface LevelDTO {
 export interface LocationDTO {
     id: number
     location: string
+    active: boolean
     created_at: Date
 }
 

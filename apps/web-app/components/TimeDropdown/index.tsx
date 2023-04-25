@@ -1,5 +1,7 @@
 import React from "react"
 
+import { to24HourFormat } from "../../data/dateFormat"
+
 interface TimeDropdownProps {
     id: string
     value: string
@@ -28,7 +30,7 @@ const TimeDropdown: React.FC<TimeDropdownProps> = ({ id, value, onChange, minTim
         }
     }
 
-    const filteredTimes = times.filter((time) => time > minTime).map(to12HourFormat)
+    const filteredTimes = times.filter((time) => time > to24HourFormat(minTime)).map(to12HourFormat)
 
     return (
         <select
