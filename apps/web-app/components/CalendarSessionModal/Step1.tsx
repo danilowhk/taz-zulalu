@@ -15,7 +15,7 @@ import UserIcon from "../../public/userIcon.svg"
 
 import TimeDropdown from "../TimeDropdown"
 
-import { removeTimezone, displayDateWithoutTimezone } from "../../data/dateFormat"
+import { removeTimezone, displayDateWithoutTimezone, to24HourFormat } from "../../data/dateFormat"
 
 import {
     TracksDTO,
@@ -99,7 +99,6 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
             setNewSession({
                 ...newSession,
                 track: eventName,
-                location: "Other",
                 event_id: selectedEvent.id,
                 event_slug: selectedEvent.slug,
                 event_item_id: selectedEvent.item_id
@@ -244,7 +243,9 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
     }, [])
 
     const isOverlapping = (filteredSessions: SessionsDTO[]) =>
-        filteredSessions.some((item) => !(endTime <= item.startTime || startTime >= item.end_time))
+        filteredSessions.some(
+            (item) => !(to24HourFormat(endTime) <= item.startTime || to24HourFormat(startTime) >= item.end_time)
+        )
 
     const handleNextStep = () => {
         if (
@@ -280,6 +281,8 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
 
                 return selectedDate.isSame(newSessionStartDate)
             })
+        console.log(newSession)
+        console.log("FILTERED", filteredSeshs)
 
         if (location === "Other") {
             return setSteps(2)
@@ -344,7 +347,7 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
                 </select>
             </div>
 
-            {event_id !== 101 && (
+            {
                 <div className="flex flex-col gap-1 w-full my-2">
                     <label htmlFor="location" className="font-[600]">
                         Location*
@@ -365,7 +368,7 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
                             ))}
                     </select>
                 </div>
-            )}
+            }
 
             <div className="flex flex-col md:flex-row w-full gap-5 my-2">
                 <div className="flex flex-col w-full md:w-2/6 z-[10]">
