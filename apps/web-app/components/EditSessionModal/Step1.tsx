@@ -112,7 +112,6 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionI
             setNewSession({
                 ...newSession,
                 track: eventName,
-                location: "Other",
                 event_id: selectedEvent.id,
                 event_slug: selectedEvent.slug,
                 event_item_id: selectedEvent.item_id
@@ -253,7 +252,9 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionI
     }, [])
 
     const isOverlapping = (filteredSessions: SessionsDTO[]) =>
-        filteredSessions.some((item) => !(endTime <= item.startTime || startTime >= item.end_time))
+        filteredSessions.some(
+            (item) => !(to24HourFormat(endTime) <= item.startTime || to24HourFormat(startTime) >= item.end_time)
+        )
 
     const handleNextStep = () => {
         if (
@@ -356,28 +357,26 @@ const Step1 = ({ newSession, setNewSession, setSteps, sessions, events, sessionI
                 </select>
             </div>
 
-            {event_id !== 101 && (
-                <div className="flex flex-col gap-1 w-full my-2">
-                    <label htmlFor="location" className="font-[600]">
-                        Location*
-                    </label>
-                    <select
-                        id="location"
-                        name="location"
-                        value={newSession.location}
-                        className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
-                        onChange={(e) => setNewSession({ ...newSession, location: e.target.value })}
-                    >
-                        <option value="Select Location">Select Location</option>
-                        {locationsOpt &&
-                            locationsOpt.map((item, index) => (
-                                <option key={index} value={item.location}>
-                                    {item.location}
-                                </option>
-                            ))}
-                    </select>
-                </div>
-            )}
+            <div className="flex flex-col gap-1 w-full my-2">
+                <label htmlFor="location" className="font-[600]">
+                    Location*
+                </label>
+                <select
+                    id="location"
+                    name="location"
+                    value={newSession.location}
+                    className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"
+                    onChange={(e) => setNewSession({ ...newSession, location: e.target.value })}
+                >
+                    <option value="Select Location">Select Location</option>
+                    {locationsOpt &&
+                        locationsOpt.map((item, index) => (
+                            <option key={index} value={item.location}>
+                                {item.location}
+                            </option>
+                        ))}
+                </select>
+            </div>
 
             <div className="flex flex-col md:flex-row w-full gap-5 my-2">
                 <div className="flex flex-col w-full md:w-2/6 z-[10]">
