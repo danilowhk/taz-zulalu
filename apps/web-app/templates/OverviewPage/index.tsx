@@ -17,7 +17,7 @@ const OverviewPage = ({ sessions }: Props) => {
                         <table className="w-full p-5 text-[12px] table-fixed border-collapse border border-slate-400 p-8">
                             <thead>
                                 <tr className="bg-slate-200">
-                                    <th className="border border-slate-300 font-semibold tracking-wide p-3">ID</th>
+                                    {/* <th className="border border-slate-300 font-semibold tracking-wide p-3">ID</th> */}
                                     <th className="border border-slate-300 font-semibold tracking-wide p-3 w-[200px]">
                                         Name
                                     </th>
@@ -26,6 +26,9 @@ const OverviewPage = ({ sessions }: Props) => {
                                     </th>
                                     <th className="border border-slate-300 font-semibold tracking-wide p-3">
                                         StartTime
+                                    </th>
+                                    <th className="border border-slate-300 font-semibold tracking-wide p-3">
+                                        End Time
                                     </th>
                                     <th className="border border-slate-300 font-semibold tracking-wide p-3">
                                         Location
@@ -38,9 +41,9 @@ const OverviewPage = ({ sessions }: Props) => {
                             <tbody>
                                 {sessions.map((event, index) => (
                                     <tr key={index} className="font-light">
-                                        <th className="border border-slate-300 font-normal tracking-wide p-3">
+                                        {/* <th className="border border-slate-300 font-normal tracking-wide p-3">
                                             {event.id}
-                                        </th>
+                                        </th> */}
                                         <th className="border border-slate-300 font-normal tracking-wide p-3">
                                             {event.name}
                                         </th>
@@ -49,6 +52,9 @@ const OverviewPage = ({ sessions }: Props) => {
                                         </th>
                                         <th className="border border-slate-300 font-normal tracking-wide p-3">
                                             {event.startTime}
+                                        </th>
+                                        <th className="border border-slate-300 font-normal tracking-wide p-3">
+                                            {event.end_time}
                                         </th>
                                         <th className="border border-slate-300 font-normal tracking-wide p-3">
                                             {event.location}
