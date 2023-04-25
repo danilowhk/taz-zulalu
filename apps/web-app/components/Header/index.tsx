@@ -106,6 +106,24 @@ const Header = () => {
                             Zuzalu Passport
                         </li>
                     </a>
+                    <a href={"https://zuzalu.streameth.org/"} target="_blank">
+                        <li
+                            className={`flex items-center gap-2 cursor-pointer text-[#F8FFFE] text-[18px] ${
+                                router.asPath === "/faq" ? "font-[700]" : "font-[400]"
+                            }`}
+                        >
+                            Livestreams
+                        </li>
+                    </a>
+                    <NextLink href={"/zapps"}>
+                        <li
+                            className={`cursor-pointer text-[#F8FFFE] text-[18px] ${
+                                router.asPath === "/zapps" ? "font-[700]" : "font-[400]"
+                            }`}
+                        >
+                            ZApps
+                        </li>
+                    </NextLink>
                     {!userInfo && (
                         <a href="https://airtable.com/shrRZrZbozPE2g6HH" target="_blank" rel="noopener noreferrer">
                             <li className="cursor-pointer font-[400] text-[18px] text-[#F8FFFE]">Apply Now</li>
