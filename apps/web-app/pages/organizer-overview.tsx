@@ -28,7 +28,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
             name: item.name,
             startDate: item.startDate,
             startTime: item.startTime,
-            endTime: item.end_time,
+            end_time: item.end_time,
             location: item.location,
             customLocation: item.custom_location,
             equipment: item.equipment

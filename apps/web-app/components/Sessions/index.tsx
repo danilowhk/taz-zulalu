@@ -116,7 +116,6 @@ const Sessions = ({ event, sessions }: Props) => {
                                                                 />
                                                             )}
                                                             <p className="text-[#1C2928] font-[400] text-[16px]">
-                                                                {organizer.role}:{" "}
                                                                 <span className="font-[600] capitalize">
                                                                     {organizer.name}
                                                                 </span>
@@ -195,7 +194,6 @@ const Sessions = ({ event, sessions }: Props) => {
                                                             />
                                                         )}
                                                         <p className="text-[#1C2928] font-[400] text-[16px]">
-                                                            {organizer.role}:{" "}
                                                             <span className="font-[600] capitalize">
                                                                 {organizer.name}
                                                             </span>
