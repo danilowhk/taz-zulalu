@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import axios from "axios"
 import NextImage from "next/image"
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import BaseTemplate from "../Base"
@@ -17,34 +18,28 @@ type Props = {
 }
 
 const MyProfilePage = ({ events, sessions }: Props) => {
-    const { userInfo, userSessions, userParticipatingSessions, userRole } = useUserAuthenticationContext()
+    const { userInfo, userSessions } = useUserAuthenticationContext()
     const [eventsOpt, setEventsOpt] = useState<string[]>([])
     const [selectedOpt, setSelectedOpt] = useState<string[]>([])
-    const [tickets, setTickets] = useState<any[]>([])
     const [openAddSessionModal, setOpenAddSessionModal] = useState(false)
     const [openCreateProfileModal, setOpenCreateProfileModal] = useState(false)
     const [openEditProfileModal, setOpenEditProfileModal] = useState(false)
     const [profile, setProfile] = useState<any>()
     const [reRender, setRerender] = useState(false)
 
-    async function getUserTickets() {
-        try {
-            console.log(userInfo!.email)
-            const supabaseResponse = await supabase.from("tickets").select("*").eq("email", userInfo!.email)
-            console.log("my profile", supabaseResponse)
-            if (!supabaseResponse.error) {
-                setTickets(supabaseResponse.data)
-            }
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
     async function fetchProfile() {
-        if (userInfo) {
+        if (userInfo !== undefined) {
             try {
-                const response = await supabase.from("user_profiles").select().eq("user_id", userInfo!.id).single()
-                if (!response.error) {
+                const response = await axios.post(
+                    "/api/fetchUserProfile",
+                    { id: userInfo.id },
+                    {
+                        headers: {
+                            htmlcode: process.env.KEY_TO_API as string
+                        }
+                    }
+                )
+                if (response.status === 200) {
                     setProfile(response.data)
                 }
             } catch (error) {
@@ -65,7 +60,6 @@ const MyProfilePage = ({ events, sessions }: Props) => {
             const eventsName = userSessions.map((item) => item.events).map((event) => event.name.replace("\n", ""))
             const uniqueValues = eventsName.filter((value, index, self) => self.indexOf(value) === index)
             setEventsOpt(uniqueValues)
-            getUserTickets()
         }
     }, [userSessions])
 
@@ -89,54 +83,7 @@ const MyProfilePage = ({ events, sessions }: Props) => {
             : sortByDate
     return (
         <BaseTemplate>
-            {/* <div className="flex flex-col bg-[#EEEEF0] px-6 sm:px-12 md:px-[24px] py-6 sm:py-12 md:py-[24px] gap-4 sm:gap-8 md:gap-[16px]"> */}
             <div className="flex flex-col bg-[#EEEEF0] px-4 md:px-[24px] py-4 md:py-[24px] gap-4 md:gap-[16px]">
-                {/* <div className="hidden md:flex flex-col items-center px-[32px] gap-[8px] bg-white w-full rounded-[8px] flex-wrap">
-                    <div className="flex flex-row justify-between items-center p-[16px] gap-[24px] w-full">
-                        <div className="flex flex-row items-start md:items-center w-full md:w-auto mb-4 md:mb-0 space-y-4 md:space-y-0 md:space-x-4">
-                            <div className="flex w-auto gap-2 px-2 py-1 text-[16px] items-center">
-                                <NextImage src={"/user-icon-5.svg"} alt="calendar" width={24} height={24} />
-                                <p className="font-[700] text-[18px]">{userInfo && userInfo.userName}</p>
-                            </div>
-                            {profile ? (
-                                <>
-                                    {profile.location && (
-                                        <div className="flex w-auto gap-2 px-2 py-1 items-center">
-                                            <NextImage src={"/pin-map.svg"} alt="location" width={16} height={16} />
-                                            <p className="text-[16px] font-[600]">{profile.location}</p>
-                                        </div>
-                                    )}
-                                    {profile.company && (
-                                        <div className="flex w-auto gap-2 px-2 py-1 text-[16px] items-center">
-                                            <NextImage src={"/briefcase.svg"} alt="location" width={24} height={24} />
-                                            <p className="text-[16px] font-[600]">{profile.company}</p>
-                                        </div>
-                                    )}
-                                </>
-                            ) : (
-                                ""
-                            )}
-                        </div>
-                        {profile ? (
-                            <button
-                                onClick={() => setOpenEditProfileModal(true)}
-                                className="flex flex-row font-[600] justify-center items-center py-[8px] px-[16px] gap-[8px] bg-[#35655F] rounded-[8px] text-white text-[16px]"
-                            >
-                                <NextImage src={"/pencil.svg"} alt="edit" height={16} width={16} />
-                                <p>EDIT</p>
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => setOpenCreateProfileModal(true)}
-                                className="flex flex-row font-[600] justify-center items-center py-[8px] px-[16px] gap-[8px] bg-[#35655F] rounded-[8px] text-white text-[16px]"
-                            >
-                                SET UP PROFILE
-                            </button>
-                        )}
-                    </div>
-                </div> */}
-
-                {/* mobile version */}
                 {profile ? (
                     <div className="flex md:hidden flex-col items-start gap-[8px] bg-white w-full rounded-[16px]">
                         <div className="flex flex-col items-start pt-[16px] px-[16px] pb-[24px] gap-[24px] w-full">
@@ -321,25 +268,6 @@ const MyProfilePage = ({ events, sessions }: Props) => {
                                             />
                                             {item}
                                         </label>
-                                    ))}
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col p-5 gap-5 bg-white rounded-[8px]">
-                            <h1 className="text-[24px] font-semibold">My Tickets</h1>
-                            <div className="flex gap-2 flex-col justify-center items-start">
-                                {tickets &&
-                                    tickets.map((item, index) => (
-                                        <div key={index} className="flex items-center gap-1 cursor-pointer w-auto">
-                                            <NextImage src={"/vector-ticket-black.svg"} width={14} height={12} />
-                                            <a
-                                                onClick={() => openPDFPopup(item.pdf_link)}
-                                                className="capitalize border-b border-[#52B5A4] text-[16px]"
-                                                style={{ cursor: "pointer" }}
-                                            >
-                                                {item.name}
-                                            </a>
-                                        </div>
                                     ))}
                             </div>
                         </div>

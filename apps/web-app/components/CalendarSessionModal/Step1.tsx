@@ -551,6 +551,7 @@ const Step1 = ({ events, newSession, setNewSession, setSteps, sessions, checkIfS
 
                 <input
                     id="maximum-rsvp"
+                    autoComplete="new-password"
                     type="number"
                     value={maxRsvp}
                     className="border-[#C3D0CF] bg-white border-2 p-1 rounded-[8px] h-[42px] w-full"

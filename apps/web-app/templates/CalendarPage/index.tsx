@@ -6,7 +6,6 @@ import { SessionsDTO, EventsDTO } from "../../types"
 import BaseTemplate from "../Base"
 import CalendarPageSessions from "../../components/Sessions/CalendarPageSessions"
 import CalendarSessionModal from "../../components/CalendarSessionModal"
-import TicketsModal from "../../components/TicketsModal"
 import { useUserAuthenticationContext } from "../../context/UserAuthenticationContext"
 import StyledDatePicker from "../../components/StyledDatePicker"
 import ContactModal from "../../components/ContactModal"
@@ -21,7 +20,6 @@ const CalendarPage = ({ sessions, events }: Props) => {
     const { userInfo } = useUserAuthenticationContext()
 
     const [openAddSessionModal, setOpenAddSessionModal] = useState(false)
-    const [openAddTicketsModal, setOpenAddTicketsModal] = useState(false)
     const [selectedLocations, setSelectedLocations] = useState<string[]>([])
     const [locationsOptions, setLocationsOptions] = useState<string[]>([])
     const [openContactModal, setOpenContactModal] = useState(false)
@@ -170,21 +168,6 @@ const CalendarPage = ({ sessions, events }: Props) => {
                         >
                             CONTACT ORGANIZERS
                         </button>
-
-                        <button
-                            onClick={() => setOpenAddTicketsModal(true)}
-                            className="bg-zulalu-primary text-white py-[8px] px-[16px] rounded-[8px] gap-[8px] flex flex-row items-center justify-center"
-                        >
-                            <NextImage src={"/ticket.svg"} width={13} height={12} />
-                            <p>TICKETS</p>
-                        </button>
-
-                        <TicketsModal
-                            isOpen={openAddTicketsModal}
-                            closeModal={setOpenAddTicketsModal}
-                            checkSession={undefined}
-                            userInfo={userInfo}
-                        />
                     </div>
                 </div>
 
