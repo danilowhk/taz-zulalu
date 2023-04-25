@@ -46,7 +46,7 @@ const Zapps = () => (
                 {projects.map((item, index) => (
                     <a key={index} href={item.link} target="_blank" rel="noopener noreferrer">
 
-                    <div key={index} className="flex h-[250px] flex-col shadow-md rounded-[16px]">
+                    <div key={index} className="flex sm:h-[250px] h-[500px] flex-col shadow-md rounded-[16px]">
                         <NextImage
                             style={{ borderTopLeftRadius: "16px", borderTopRightRadius: "16px" }}
                             src={item.img}
