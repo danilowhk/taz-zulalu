@@ -1,12 +1,12 @@
 import Head from "next/head"
 import NextImage from "next/image"
 import NextLink from "next/link"
+import moment from "moment"
 import MainSection from "../../components/MainSection"
 import { useUserAuthenticationContext } from "../../context/UserAuthenticationContext"
 import { useUserPassportContext } from "../../context/UserPassportContext"
 import CalendarPageSessions from "../../components/Sessions/CalendarPageSessions"
 import Events from "../../components/Events"
-import moment from "moment"
 
 import BaseTemplate from "../Base"
 import { SessionsDTO, EventsDTO } from "../../types"
