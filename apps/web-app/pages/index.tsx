@@ -2,10 +2,10 @@
 import { GetServerSideProps } from "next"
 import Dexie from "dexie"
 import axios from "axios"
+import moment from "moment"
 import { useEffect } from "react"
 import { EventsDTO, SessionsDTO } from "../types"
 import HomeTemplate from "../templates/Home"
-import moment from "moment"
 
 type Props = {
     sessions: SessionsDTO[]
@@ -105,12 +105,13 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
         const sessions = await responseSessions.data
 
         // Filter sessions to only include sessions for the upcoming 7 days
-        const filtered = sessions.filter((session: any) => {
-            const sessionStartDate = moment.utc(session.startDate).toDate()
-            const currentDate = moment.utc(new Date()).toDate()
-            const sevenDaysfromNow = moment(currentDate).add(7, "days").toDate()
 
-            return (currentDate <= sessionStartDate && sessionStartDate <= sevenDaysfromNow)
+        const todayDate = moment.utc(new Date()).format("YYYY-MM-DD")
+        const endDate = moment.utc(new Date()).add(7, "days").format("YYYY-MM-DD")
+
+        const filtered = sessions.filter((session: SessionsDTO) => {
+            const sessionDate = moment.utc(session.startDate)
+            return sessionDate.isSameOrAfter(todayDate) && sessionDate.isSameOrBefore(endDate)
         })
 
         return {
