@@ -17,7 +17,7 @@ interface GroupedSession {
     groupSessions: SessionsDTO[]
 }
 
-const Sessions = ({ event, sessions }: Props) => {
+const Sessions = ({ sessions }: Props) => {
     const groupedByStartDate: GroupedSession[] = sessions.reduce((acc: GroupedSession[], session: SessionsDTO) => {
         const startDateStr: string = moment.utc(session.startDate).format("YYYY-MM-DD")
         const group: GroupedSession | undefined = acc.find((item: GroupedSession) => item.startDate === startDateStr)

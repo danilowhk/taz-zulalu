@@ -8,7 +8,6 @@ import ParticipateButton from "../ParticipateButton"
 
 type Props = {
     sessions: SessionsDTO[]
-    showStartDate?: boolean
 }
 
 interface GroupedSession {
@@ -16,7 +15,7 @@ interface GroupedSession {
     groupSessions: SessionsDTO[]
 }
 
-const CalendarPageSessions = ({ sessions, showStartDate = false }: Props) => {
+const CalendarPageSessions = ({ sessions }: Props) => {
     const groupedByStartDate: GroupedSession[] = sessions.reduce((acc: GroupedSession[], session: SessionsDTO) => {
         const startDateStr: string = moment.utc(session.startDate).format("YYYY-MM-DD")
         const group: GroupedSession | undefined = acc.find((item: GroupedSession) => item.startDate === startDateStr)
