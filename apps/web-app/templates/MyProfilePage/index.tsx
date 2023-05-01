@@ -189,7 +189,7 @@ const MyProfilePage = ({ events, sessions }: Props) => {
                                 )}
                             </div>
                             <div className="flex flex-col items-start p-[2px] gap-[16px]">
-                                <Sessions sessions={filteredSessions} showStartDate={true} />
+                                <Sessions sessions={filteredSessions} />
                             </div>
                         </div>
                     </div>
