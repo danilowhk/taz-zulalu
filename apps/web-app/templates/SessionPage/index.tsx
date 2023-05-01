@@ -158,7 +158,7 @@ const SessionPage = ({ session, sessions, userId, events }: Props) => {
                             </div>
                             <div className="flex gap-1 items-center justify-start mt-4">
                                 <NextImage src={"/vector-clock.svg"} alt="calendar" width={15} height={15} />
-                                <h1 className="text-zulalu-secondary">{`${startTime}:${end_time}`}</h1>
+                                <h1 className="text-zulalu-secondary">{`${startTime} - ${end_time}`}</h1>
                             </div>
                             <div className="flex gap-1 items-center justify-start mt-4">
                                 <NextImage src={"/vector-location.svg"} alt="calendar" width={15} height={15} />
@@ -166,6 +166,15 @@ const SessionPage = ({ session, sessions, userId, events }: Props) => {
                                     {location === "Other" ? custom_location : location}
                                 </h1>
                             </div>
+                            {checkOrganizerOrCreator && (
+                                <div className="flex gap-1 items-center justify-start mt-4">
+                                    <NextImage src={"/info.svg"} alt="RSVP capacity" width={15} height={15} />
+                                    <h1 className="text-zulalu-secondary">
+                                        {session.totalParticipants} /{" "}
+                                        {session.capacity ? session.capacity : "UNLIMITED"} RSVPs
+                                    </h1>
+                                </div>
+                            )}
                         </div>
                         <div className="flex flex-col gap-[24px] w-full mt-4">
                             <div className="w-full md:w-5/6 py-5">{reactContent}</div>
