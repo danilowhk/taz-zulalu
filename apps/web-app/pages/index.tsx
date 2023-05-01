@@ -4,6 +4,10 @@ import Dexie from "dexie"
 import axios from "axios"
 import moment from "moment"
 import { useEffect } from "react"
+
+import { startOfDay, addDays, format } from "date-fns"
+import { utcToZonedTime } from "date-fns-tz"
+
 import { EventsDTO, SessionsDTO } from "../types"
 import HomeTemplate from "../templates/Home"
 
@@ -106,8 +110,17 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 
         // Filter sessions to only include sessions for the upcoming 7 days
 
-        const todayDate = moment.utc(new Date()).format("YYYY-MM-DD")
-        const endDate = moment.utc(new Date()).add(7, "days").format("YYYY-MM-DD")
+        const timezone = "Europe/Podgorica"
+        const now = new Date()
+
+        // Get the local time in the specified timezone
+        const localTime = utcToZonedTime(now, timezone)
+
+        // Get today's date in the specified timezone
+        const todayDate = format(startOfDay(localTime), "yyyy-MM-dd")
+
+        // Get the date 7 days from today in the specified timezone
+        const endDate = format(addDays(startOfDay(localTime), 7), "yyyy-MM-dd")
 
         const filtered = sessions.filter((session: SessionsDTO) => {
             const sessionDate = moment.utc(session.startDate)
