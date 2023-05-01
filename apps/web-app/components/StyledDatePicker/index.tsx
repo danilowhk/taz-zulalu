@@ -16,8 +16,8 @@ const StyledDatePicker: React.FC<StyledDatePickerProps> = ({ onChange, startDate
         return isWeekend ? styles["datepicker__day--weekend"] : styles.datepicker__day
     }
 
-    const formatWeekDay = (day: Date): any => {
-        const formattedDay = moment(day).format("dd").charAt(0)
+    const formatWeekDay = (day: string): any => {
+        const formattedDay = moment(day, "dddd").format("dd").charAt(0)
         const isWeekend = moment(day).day() === 0 || moment(day).day() === 6
 
         return <span className={isWeekend ? styles.datepicker__day_name_weekend : ""}>{formattedDay}</span>
