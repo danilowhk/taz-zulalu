@@ -40,12 +40,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             throw new Error("Invalid proof")
         }
 
-        // console.log("AQUI", participant)
-
         // Valid proof, check the signed message
 
         const participant = await fetchParticipant("https://api.pcd-passport.com/", uuid)
-        console.log("3")
 
         if (participant == null || participant.commitment !== pcd.claim.identityCommitment) {
             throw new Error("Wrong UUID")
@@ -103,22 +100,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                         .from("users")
                         .select("id")
                         .eq("email", email)
-                        .single()
 
                     if (publicUserError) {
                         res.status(400).json(`Error fetching public user: ${JSON.stringify(publicUserError)}`)
+                        return
                     }
 
                     // If user profile exists, do an update of the uui_auth field
-                    if (publicUserData !== null) {
-                        const updatePublicUser = await supabase
-                            .from("users")
-                            .update({ uui_auth: signupData.user.id, role })
-                            .eq("email", email)
+                    if (publicUserData.length > 0) {
+                        await supabase.from("users").update({ uui_auth: signupData.user.id, role }).eq("email", email)
                     }
                     // Otherwise, add the user profile
                     else {
-                        const { data: addUserData, error: addUserError } = await supabase.from("users").insert({
+                        const { error: addUserError } = await supabase.from("users").insert({
                             userName: name,
                             email,
                             uui_auth: signupData.user.id,
@@ -126,7 +120,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                         })
 
                         if (addUserError) {
-                            res.status(400).json("Error fetching public user")
+                            res.status(400).json("Error to add public user")
                         }
                     }
 
